@@ -30,7 +30,7 @@ STATE = {
 }
 
 HOME_COUNTRY_KEY = "home_country"
-PAGE_SIZE = 12  # annonces affichees d'un coup (chaque carte = ~45 elements a envoyer au telephone)
+PAGE_SIZE = 6  # annonces affichees d'un coup (chaque carte = ~45 elements a envoyer au telephone)
 
 def reset_home_state():
     STATE.update(
@@ -173,7 +173,17 @@ def home_view(page: ft.Page) -> ft.View:
         STATE["search"] = (search.value or "").strip()
         refresh()
 
-    search.on_change = on_search
+    _deb = {"t": None}
+
+    def on_search_debounced(e):
+        # attend 0,45 s sans frappe avant de reconstruire la liste
+        if _deb["t"] is not None:
+            _deb["t"].cancel()
+        _deb["t"] = threading.Timer(0.45, on_search, args=(e,))
+        _deb["t"].daemon = True
+        _deb["t"].start()
+
+    search.on_change = on_search_debounced
 
     tx_row = ft.Row(scroll=ft.ScrollMode.AUTO, spacing=8)
     cat_row = ft.Row(scroll=ft.ScrollMode.AUTO, spacing=8)
@@ -322,7 +332,7 @@ def home_view(page: ft.Page) -> ft.View:
     # ===== MENU DRAWER - SEUL AJOUT =====
     def handle_drawer(e):
         idx = e.control.selected_index
-        routes = ["/home", "/favoris", "/annonces", "/publish", "/profile", "/notifications", "/settings", "logout"]
+        routes = ["/home", "/favoris", "/mes-annonces", "/publish", "/profile", "/notifications", "/settings", "logout"]
         r = routes[idx] if idx < len(routes) else "/home"
         drawer.open = False
         page.update()
@@ -386,7 +396,7 @@ def home_view(page: ft.Page) -> ft.View:
 FT_NAV_DEST = getattr(ft, "NavigationDestination", None) or getattr(ft, "NavigationBarDestination", None)
 
 def bottom_bar(page: ft.Page, index: int) -> ft.NavigationBar:
-    routes = ["/home", "/favoris", "/annonces", "/profile"]
+    routes = ["/home", "/favoris", "/mes-annonces", "/profile"]
     def on_change(e):
         page.go(routes[e.control.selected_index])
     return ft.NavigationBar(

@@ -44,7 +44,7 @@ def image_kwargs(src: Optional[str], width: Optional[int] = None) -> Dict[str, s
         st = path.stat()
         key = (str(path), st.st_mtime_ns, st.st_size)
         if key not in _B64_CACHE:
-            if len(_B64_CACHE) > 80:
+            if len(_B64_CACHE) > 10:
                 _B64_CACHE.pop(next(iter(_B64_CACHE)))
             _B64_CACHE[key] = base64.b64encode(path.read_bytes()).decode("ascii")
         return {"src_base64": _B64_CACHE[key]}
@@ -440,7 +440,6 @@ def bien_card(page: ft.Page, bien: Dict[str, Any], on_open: Callable, on_changed
                 ft.Text(bien.get("titre",""), weight=ft.FontWeight.BOLD, size=15, max_lines=2, overflow=ft.TextOverflow.ELLIPSIS),
                 ft.Row(spacing=6, controls=[
                     ft.Icon(FT_ICONS.LOCATION_ON_OUTLINED, size=15, color=COLORS["muted"]),
-                    flag_image(bien.get("country_code","CM"), size=14),
                     ft.Text(f"{bien.get('city')} - {bien.get('locality')}", size=12, color=COLORS["muted"]),
                 ]),
                 ft.Text(format_prix(bien), weight=ft.FontWeight.BOLD, size=16, color=COLORS["primary"]),

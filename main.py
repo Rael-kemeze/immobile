@@ -18,9 +18,21 @@ try:
 except Exception:
     FT_ICONS = ft.icons
 
-from services.auth import Session
+class _LazySession:
+    """Proxy : ne charge services.auth (donc supabase) qu'au premier usage,
+    pour que le splash s'affiche AVANT les imports lourds."""
+
+    def __getattr__(self, name):
+        from services.auth import Session as _S
+        return getattr(_S, name)
+
+
+Session = _LazySession()
 from services.config import APP_CONFIG, COLORS, LANGUAGES
-from services.db import WEB_UPLOAD_DIR
+from pathlib import Path as _Path
+
+UPLOAD_DIR = _Path(os.getenv("FLET_APP_STORAGE_DATA") or _Path(__file__).parent) / "uploads"
+WEB_UPLOAD_DIR = UPLOAD_DIR  # meme chemin que services.db, sans importer db au demarrage
 from services.i18n import init_lang, set_lang
 
 

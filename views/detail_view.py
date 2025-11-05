@@ -47,10 +47,10 @@ def detail_view(page: ft.Page, bien_id: str) -> ft.View:
     is_admin = Session.is_admin()
 
     photos = bien.get("photos") or [None]
-    main_img = ft.Image(**image_kwargs(photos[0]), width=800, height=420 if is_desktop else 220, fit=ft.ImageFit.COVER, border_radius=12)
+    main_img = ft.Image(**image_kwargs(photos[0], width=1000), width=800, height=420 if is_desktop else 220, fit=ft.ImageFit.COVER, border_radius=12)
 
     def update_main(idx: int):
-        kwargs = image_kwargs(photos[idx])
+        kwargs = image_kwargs(photos[idx], width=1000)
         if "src_base64" in kwargs:
             main_img.src_base64 = kwargs["src_base64"]; main_img.src = None
         else:
@@ -63,7 +63,7 @@ def detail_view(page: ft.Page, bien_id: str) -> ft.View:
     for i, p in enumerate(photos[:10]):
         c = ft.Container(width=72, height=56, border_radius=8, clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
             border=ft.border.all(2.5, COLORS["primary"] if i == 0 else "#E0E4E1"),
-            content=ft.Image(**image_kwargs(p), width=72, height=56, fit=ft.ImageFit.COVER),
+            content=ft.Image(**image_kwargs(p, width=160), width=72, height=56, fit=ft.ImageFit.COVER),
             on_click=lambda e, idx=i: update_main(idx))
         thumbs.controls.append(c)
 

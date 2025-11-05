@@ -3,7 +3,6 @@ import flet as ft
 import time
 import threading
 from services.config import APP_CONFIG, COLORS
-from services.auth_service import get_session, restore_session
 
 # COMPAT
 try:
@@ -28,6 +27,7 @@ def splash_view(page: ft.Page) -> ft.View:
         started = time.time()
         try:
             try:
+                from services.auth_service import get_session, restore_session  # import tardif
                 has_session = get_session(page) and restore_session(page)
             except:
                 has_session = False

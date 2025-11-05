@@ -95,7 +95,7 @@ def mes_annonces_view(page: ft.Page) -> ft.View:
                     controls=[
                         ft.Container(
                             content=ft.Image(
-                                **image_kwargs(photos[0]), width=70, height=70, fit=ft.ImageFit.COVER
+                                **image_kwargs(photos[0], width=200), width=70, height=70, fit=ft.ImageFit.COVER
                             ),
                             border_radius=10,
                             clip_behavior=ft.ClipBehavior.HARD_EDGE,
