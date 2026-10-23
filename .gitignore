@@ -1,0 +1,10 @@
+venv/
+__pycahche__/
+*.pyc
+.env
+local_db.json
+essets/uploads/
+uploads
+build/
+.flet/
+.pytest_cache/
