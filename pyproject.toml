@@ -18,7 +18,7 @@ immobile = "main:main"
 
 [tool.flet]
 org = "com.immobile.cameroun"
-project = "IMMOBILE"
+project = "immobile"
 description = "IMMOBILE - Immobilier pour tous - Cameroun"
 # L'icône sera prise automatiquement depuis assets/icon.png si elle existe
 # Tu peux aussi forcer ici :
