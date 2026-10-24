@@ -3,42 +3,41 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.5'
           channel: 'stable'
+
       - name: Install deps
         run: |
           sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev || true
           yes | flutter doctor --android-licenses || true
           pip install flet==0.27.1 pyinstaller==6.10.0 supabase python-dotenv cloudinary Pillow httpx requests
-      - name: Create env and fix pyproject MINUSCULE
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+
+      - name: Fix pyproject.toml SANS espaces
         run: |
-          mkdir -p assets
-          # CORRECTION IMPORTANTE: project en minuscule !
-          cat > pyproject.toml <<'PYEOF'
-          [project]
+          python3 << 'PY'
+          content = """[project]
           name = "immobile"
           version = "1.0.1"
-          description = "IMMOBILE - Cameroun"
+          description = "IMMOBILE Cameroun"
           requires-python = ">=3.9"
           dependencies = ["flet==0.27.1","supabase==2.9.1","python-dotenv==1.0.1","cloudinary","Pillow"]
 
@@ -48,8 +47,19 @@ jobs:
           description = "IMMOBILE"
           main = "main.py"
           assets_dir = "assets"
-          PYEOF
-          cat pyproject.toml
+          """
+          open("pyproject.toml","w").write(content)
+          print(open("pyproject.toml").read())
+          PY
+
+      - name: Create .env
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+        run: |
           cat > .env <<EOF
           SUPABASE_URL=$SUPABASE_URL
           SUPABASE_KEY=$SUPABASE_KEY
@@ -59,17 +69,21 @@ jobs:
           CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
           OTP_MODE=disabled
           EOF
+          ls -la
+
       - name: Build APK
         run: |
-          flet --version
           flet build apk --project . --verbose 2>&1 | tee build.log
-          echo "--- TAIL LOG ---"
-          tail -200 build.log
-      - uses: actions/upload-artifact@v4
+          echo "=== APK SEARCH ==="
+          find . -name "*.apk" -type f
+          ls -lh build/ || true
+          tail -50 build.log
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: immobile-apk
           path: |
-            build/**/*.apk
             **/*.apk
             build.log
-          if-no-files-found: warn
+          if-no-files-found: error
