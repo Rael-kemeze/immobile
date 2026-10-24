@@ -3,11 +3,9 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,7 +24,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev || true
           yes | flutter doctor --android-licenses || true
           pip install flet==0.27.1 pyinstaller==6.10.0 supabase python-dotenv cloudinary Pillow httpx requests
-      - name: Create env
+      - name: Create env and fix pyproject MINUSCULE
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -34,6 +32,24 @@ jobs:
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
+          mkdir -p assets
+          # CORRECTION IMPORTANTE: project en minuscule !
+          cat > pyproject.toml <<'PYEOF'
+          [project]
+          name = "immobile"
+          version = "1.0.1"
+          description = "IMMOBILE - Cameroun"
+          requires-python = ">=3.9"
+          dependencies = ["flet==0.27.1","supabase==2.9.1","python-dotenv==1.0.1","cloudinary","Pillow"]
+
+          [tool.flet]
+          org = "com.immobile.cameroun"
+          project = "immobile"
+          description = "IMMOBILE"
+          main = "main.py"
+          assets_dir = "assets"
+          PYEOF
+          cat pyproject.toml
           cat > .env <<EOF
           SUPABASE_URL=$SUPABASE_URL
           SUPABASE_KEY=$SUPABASE_KEY
@@ -43,18 +59,12 @@ jobs:
           CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
           OTP_MODE=disabled
           EOF
-          cat > pyproject.toml <<'PYEOF'
-          [project]
-          name = "immobile"
-          version = "1.0.1"
-          dependencies = ["flet==0.27.1","supabase==2.9.1","python-dotenv==1.0.1","cloudinary","Pillow"]
-          [tool.flet]
-          org = "com.immobile.cameroun"
-          project = "IMMOBILE"
-          main = "main.py"
-          PYEOF
       - name: Build APK
-        run: flet build apk --verbose --project . 2>&1 | tee build.log
+        run: |
+          flet --version
+          flet build apk --project . --verbose 2>&1 | tee build.log
+          echo "--- TAIL LOG ---"
+          tail -200 build.log
       - uses: actions/upload-artifact@v4
         with:
           name: immobile-apk
