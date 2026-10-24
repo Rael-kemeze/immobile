@@ -1,0 +1,33 @@
+[project]
+name = "immobile"
+version = "1.0.1"
+description = "IMMOBILE - Immobilier Cameroun - Bafoussam, Yaounde, Douala"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "flet",
+    "supabase",
+    "python-dotenv",
+    "cloudinary",
+    "Pillow",
+    "requests",
+]
+
+[project.scripts]
+immobile = "main:main"
+
+[tool.flet]
+org = "com.immobile.cameroun"
+project = "IMMOBILE"
+description = "IMMOBILE - Immobilier pour tous - Cameroun"
+# L'icône sera prise automatiquement depuis assets/icon.png si elle existe
+# Tu peux aussi forcer ici :
+icon = "assets/icon.png"
+
+[tool.flet.icons]
+# Android & iOS icons
+icon = "assets/icon.png"
+
+[tool.flet.splash]
+# Splash screen
+background = "#0F6B3E"
