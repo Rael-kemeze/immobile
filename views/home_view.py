@@ -99,7 +99,7 @@ def home_view(page: ft.Page) -> ft.View:
                 content=ft.Column(
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[
-                        ft.Icon(ft.icons.SEARCH_OFF, size=56, color=COLORS["muted"]),
+                        ft.Icon(ft.Icons.SEARCH_OFF, size=56, color=COLORS["muted"]),
                         ft.Container(height=10),
                         ft.Text(t("no_results"), size=16, color=COLORS["muted"], text_align=ft.TextAlign.CENTER),
                     ]
@@ -127,7 +127,7 @@ def home_view(page: ft.Page) -> ft.View:
             )
         page.update()
 
-    search = text_field(t("search_placeholder"), prefix_icon=ft.icons.SEARCH)
+    search = text_field(t("search_placeholder"), prefix_icon=ft.Icons.SEARCH)
 
     def on_search(e):
         STATE["search"] = (search.value or "").strip()
@@ -162,7 +162,7 @@ def home_view(page: ft.Page) -> ft.View:
 
     build_chips()
 
-    country_options = [ft.dropdown.Option(key="ALL", content=ft.Row(spacing=8, controls=[ft.Icon(ft.icons.PUBLIC, size=18), ft.Text(t("all_countries"))]))] + [
+    country_options = [ft.dropdown.Option(key="ALL", content=ft.Row(spacing=8, controls=[ft.Icon(ft.Icons.PUBLIC, size=18), ft.Text(t("all_countries"))]))] + [
         ft.dropdown.Option(
             key=c["code"],
             content=ft.Row(spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER, controls=[
@@ -226,7 +226,7 @@ def home_view(page: ft.Page) -> ft.View:
                 ft.Row(spacing=10, controls=[
                     ft.Container(country_dd, width=280),
                     ft.Container(search, expand=True),
-                    ft.IconButton(ft.icons.TUNE, icon_color=COLORS["primary"], bgcolor="#FFFFFF", on_click=toggle_filters),
+                    ft.IconButton(ft.Icons.TUNE, icon_color=COLORS["primary"], bgcolor="#FFFFFF", on_click=toggle_filters),
                 ]),
                 tx_row,
                 cat_row,
@@ -236,7 +236,7 @@ def home_view(page: ft.Page) -> ft.View:
             # Mobile : colonne
             return ft.Column(spacing=8, controls=[
                 country_dd,
-                ft.Row([ft.Container(search, expand=True), ft.IconButton(ft.icons.TUNE, icon_color=COLORS["primary"], bgcolor="#FFFFFF", on_click=toggle_filters)]),
+                ft.Row([ft.Container(search, expand=True), ft.IconButton(ft.Icons.TUNE, icon_color=COLORS["primary"], bgcolor="#FFFFFF", on_click=toggle_filters)]),
                 tx_row, cat_row,
                 filters_panel,
             ])
@@ -273,11 +273,11 @@ def home_view(page: ft.Page) -> ft.View:
         route="/home",
         bgcolor=COLORS["bg"],
         appbar=app_bar(APP_CONFIG["APP_NAME"], page, actions=[
-            ft.IconButton(ft.icons.NOTIFICATIONS_OUTLINED, icon_color="#FFFFFF", on_click=lambda e: page.go("/notifications")),
-            ft.IconButton(ft.icons.REFRESH, icon_color="#FFFFFF", on_click=refresh),
-        ] + ([ft.IconButton(ft.icons.ADMIN_PANEL_SETTINGS_OUTLINED, icon_color="#FFFFFF", tooltip=t("admin_space"), on_click=lambda e: page.go("/admin"))] if Session.is_admin() else [])),
+            ft.IconButton(ft.Icons.NOTIFICATIONS_OUTLINED, icon_color="#FFFFFF", on_click=lambda e: page.go("/notifications")),
+            ft.IconButton(ft.Icons.REFRESH, icon_color="#FFFFFF", on_click=refresh),
+        ] + ([ft.IconButton(ft.Icons.ADMIN_PANEL_SETTINGS_OUTLINED, icon_color="#FFFFFF", tooltip=t("admin_space"), on_click=lambda e: page.go("/admin"))] if Session.is_admin() else [])),
         controls=[body_wrapped],
-        floating_action_button=ft.FloatingActionButton(icon=ft.icons.ADD, bgcolor=COLORS["accent"], on_click=lambda e: page.go("/publish")),
+        floating_action_button=ft.FloatingActionButton(icon=ft.Icons.ADD, bgcolor=COLORS["accent"], on_click=lambda e: page.go("/publish")),
         navigation_bar=bottom_bar(page, 0),
         padding=0,
     )
@@ -289,15 +289,15 @@ def bottom_bar(page: ft.Page, index: int) -> ft.NavigationBar:
     return ft.NavigationBar(
         selected_index=index, on_change=on_change, bgcolor="#FFFFFF", indicator_color="#D8EDE2",
         destinations=[
-            ft.NavigationDestination(icon=ft.icons.HOME_OUTLINED, label=t("nav_home")),
-            ft.NavigationDestination(icon=ft.icons.FAVORITE_BORDER, label=t("nav_favorites")),
-            ft.NavigationDestination(icon=ft.icons.LIST_ALT, label=t("nav_my_listings")),
-            ft.NavigationDestination(icon=ft.icons.PERSON_OUTLINE, label=t("nav_profile")),
+            ft.NavigationDestination(icon=ft.Icons.HOME_OUTLINED, label=t("nav_home")),
+            ft.NavigationDestination(icon=ft.Icons.FAVORITE_BORDER, label=t("nav_favorites")),
+            ft.NavigationDestination(icon=ft.Icons.LIST_ALT, label=t("nav_my_listings")),
+            ft.NavigationDestination(icon=ft.Icons.PERSON_OUTLINE, label=t("nav_profile")),
         ],
     )
 
 def empty_state(msg: str):
-    return ft.Container(padding=30, alignment=ft.alignment.center, content=ft.Column(horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[ft.Icon(ft.icons.SEARCH_OFF, size=48, color=COLORS["muted"]), ft.Text(msg, color=COLORS["muted"])]))
+    return ft.Container(padding=30, alignment=ft.alignment.center, content=ft.Column(horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[ft.Icon(ft.Icons.SEARCH_OFF, size=48, color=COLORS["muted"]), ft.Text(msg, color=COLORS["muted"])]))
 
 def skeleton_card():
     return ft.Container(bgcolor="#FFFFFF", border_radius=16, padding=12, border=ft.border.all(1, "#E0E4E1"), content=ft.Column(controls=[ft.Container(height=120, bgcolor="#EEEEEE", border_radius=8), ft.Container(height=14, bgcolor="#EEEEEE", border_radius=4)]))

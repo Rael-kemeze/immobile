@@ -29,7 +29,7 @@ def cgu_view(page: ft.Page, on_accept) -> ft.View:
             title=ft.Text(t("cgu_title"), color="#FFFFFF"),
             bgcolor=COLORS["primary"],
             leading=ft.IconButton(
-                ft.icons.ARROW_BACK,
+                ft.Icons.ARROW_BACK,
                 icon_color="#FFFFFF",
                 on_click=lambda e: page.go("/register"),
             ),
@@ -45,7 +45,7 @@ def cgu_view(page: ft.Page, on_accept) -> ft.View:
             accept_box,
             ft.Container(height=8),
             primary_button(
-                t("create_account_button"), confirm, ft.icons.CHECK_CIRCLE, expand=True
+                t("create_account_button"), confirm, ft.Icons.CHECK_CIRCLE, expand=True
             ),
         ],
     )

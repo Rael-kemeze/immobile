@@ -55,7 +55,7 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
             return ft.View(
                 route="/publish",
                 bgcolor=COLORS["bg"],
-                appbar=ft.AppBar(leading=ft.IconButton(ft.icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/home")), title=ft.Text(t("publish_title"), color="#FFFFFF", weight=ft.FontWeight.BOLD), bgcolor=COLORS["primary"]),
+                appbar=ft.AppBar(leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/home")), title=ft.Text(t("publish_title"), color="#FFFFFF", weight=ft.FontWeight.BOLD), bgcolor=COLORS["primary"]),
                 controls=[
                     ft.Container(
                         alignment=ft.alignment.center,
@@ -70,12 +70,12 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
                                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                                 spacing=12,
                                 controls=[
-                                    ft.Icon(ft.icons.LOCK_OUTLINED, size=64, color=COLORS["muted"]),
+                                    ft.Icon(ft.Icons.LOCK_OUTLINED, size=64, color=COLORS["muted"]),
                                     ft.Text("Limite atteinte", size=20, weight=ft.FontWeight.BOLD),
                                     ft.Text(msg, text_align=ft.TextAlign.CENTER, color=COLORS["muted"]),
                                     ft.Container(height=10),
-                                    ft.ElevatedButton("Passer en PRO - 5000 FCFA/mois", icon=ft.icons.STAR, on_click=go_premium, style=ft.ButtonStyle(bgcolor=COLORS["primary"], color="#FFFFFF"), expand=True, height=48),
-                                    ft.OutlinedButton("Acheter un Boost - 1000 FCFA", icon=ft.icons.ROCKET_LAUNCH, on_click=go_premium, expand=True),
+                                    ft.ElevatedButton("Passer en PRO - 5000 FCFA/mois", icon=ft.Icons.STAR, on_click=go_premium, style=ft.ButtonStyle(bgcolor=COLORS["primary"], color="#FFFFFF"), expand=True, height=48),
+                                    ft.OutlinedButton("Acheter un Boost - 1000 FCFA", icon=ft.Icons.ROCKET_LAUNCH, on_click=go_premium, expand=True),
                                     ft.TextButton("Voir mes annonces", on_click=lambda e: page.go("/mes-annonces")),
                                 ]
                             )
@@ -198,9 +198,9 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
     geo = CountryCitySelector(page, existing_bien.get("country_code") if is_edit else user.get("country_code"), existing_bien.get("city") if is_edit else user.get("city"), on_country=on_country)
     locality = text_field(t("zone_label"), value=existing_bien.get("locality") if is_edit else user.get("locality") or "")
     description = text_field(t("description_label"), multiline=True, min_lines=3, max_lines=6, value=_get("description"))
-    whatsapp = text_field(t("whatsapp_number_label"), value=existing_bien.get("whatsapp") if is_edit else user.get("phone") or "", keyboard_type=ft.KeyboardType.PHONE, prefix_icon=ft.icons.PHONE)
+    whatsapp = text_field(t("whatsapp_number_label"), value=existing_bien.get("whatsapp") if is_edit else user.get("phone") or "", keyboard_type=ft.KeyboardType.PHONE, prefix_icon=ft.Icons.PHONE)
     # NOUVEAU: 2ème numéro
-    whatsapp2 = text_field("2ème numéro(optionnel)", value=existing_bien.get("whatsapp2") or existing_bien.get("whatsapp_2") or "" if is_edit else "", keyboard_type=ft.KeyboardType.PHONE, prefix_icon=ft.icons.PHONE)
+    whatsapp2 = text_field("2ème numéro(optionnel)", value=existing_bien.get("whatsapp2") or existing_bien.get("whatsapp_2") or "" if is_edit else "", keyboard_type=ft.KeyboardType.PHONE, prefix_icon=ft.Icons.PHONE)
 
     photos_row = ft.Row(wrap=True, spacing=8, run_spacing=8)
     photos_title = ft.Text(f"{t('photos_label')} - {len(photos)}/{max_photos}", weight=ft.FontWeight.W_600)
@@ -212,7 +212,7 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
         photos_row.controls = [
             ft.Stack([
                 ft.Container(content=ft.Image(**image_kwargs(u), width=THUMB, height=THUMB, fit=ft.ImageFit.COVER, error_content=ft.Container(bgcolor="#DDE4DF")), width=THUMB, height=THUMB, border_radius=12, clip_behavior=ft.ClipBehavior.HARD_EDGE),
-                ft.Container(content=ft.IconButton(ft.icons.CLOSE, icon_size=14, icon_color="#FFFFFF", bgcolor="#99000000", on_click=lambda e, x=u: remove_photo(x)), alignment=ft.alignment.top_right),
+                ft.Container(content=ft.IconButton(ft.Icons.CLOSE, icon_size=14, icon_color="#FFFFFF", bgcolor="#99000000", on_click=lambda e, x=u: remove_photo(x)), alignment=ft.alignment.top_right),
             ], width=THUMB, height=THUMB) for u in photos
         ]
         page.update()
@@ -363,8 +363,8 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
         right_col = ft.Column(spacing=12, controls=[
             bloc([price, negotiable, on_site, ft.Divider(height=1, color="#EEEEEE"), ft.Text("Conditions location (Cameroun)", weight=ft.FontWeight.BOLD, size=13, color=COLORS["primary"]), ft.Row([ft.Container(avance_dd, expand=True), ft.Container(caution_dd, expand=True)], spacing=8)]),
             bloc([description, whatsapp, whatsapp2]),
-            bloc([photos_title, photos_row, ft.OutlinedButton(t("upload_photo_button"), icon=ft.icons.ADD_A_PHOTO_OUTLINED, on_click=picker.open), ft.Row([ft.Container(photo_url, expand=True), ft.IconButton(ft.icons.ADD_CIRCLE, icon_color=COLORS["primary"], tooltip=t("add_button"), on_click=add_photo_from_url)])]),
-            primary_button("Modifier" if is_edit else t("publish_button"), do_publish, ft.icons.CHECK if not is_edit else ft.icons.EDIT, expand=True),
+            bloc([photos_title, photos_row, ft.OutlinedButton(t("upload_photo_button"), icon=ft.Icons.ADD_A_PHOTO_OUTLINED, on_click=picker.open), ft.Row([ft.Container(photo_url, expand=True), ft.IconButton(ft.Icons.ADD_CIRCLE, icon_color=COLORS["primary"], tooltip=t("add_button"), on_click=add_photo_from_url)])]),
+            primary_button("Modifier" if is_edit else t("publish_button"), do_publish, ft.Icons.CHECK if not is_edit else ft.Icons.EDIT, expand=True),
         ], expand=1)
         form_content = ft.Row(spacing=16, controls=[left_col, right_col], vertical_alignment=ft.CrossAxisAlignment.START)
         wrapped = responsive_wrapper(form_content, width=1100, padding=20)
@@ -375,10 +375,10 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
             bloc([*geo.controls, locality]),
             bloc([price, negotiable, on_site, ft.Divider(height=1, color="#EEEEEE"), ft.Text("Conditions location (Cameroun)", weight=ft.FontWeight.BOLD, size=13, color=COLORS["primary"]), ft.Row([ft.Container(avance_dd, expand=True), ft.Container(caution_dd, expand=True)], spacing=8)]),
             bloc([description, whatsapp, whatsapp2]),
-            bloc([photos_title, photos_row, ft.OutlinedButton(t("upload_photo_button"), icon=ft.icons.ADD_A_PHOTO_OUTLINED, on_click=picker.open), ft.Row([ft.Container(photo_url, expand=True), ft.IconButton(ft.icons.ADD_CIRCLE, icon_color=COLORS["primary"], tooltip=t("add_button"), on_click=add_photo_from_url)])]),
-            primary_button("Modifier l'annonce" if is_edit else t("publish_button"), do_publish, ft.icons.EDIT if is_edit else ft.icons.CHECK, expand=True),
+            bloc([photos_title, photos_row, ft.OutlinedButton(t("upload_photo_button"), icon=ft.Icons.ADD_A_PHOTO_OUTLINED, on_click=picker.open), ft.Row([ft.Container(photo_url, expand=True), ft.IconButton(ft.Icons.ADD_CIRCLE, icon_color=COLORS["primary"], tooltip=t("add_button"), on_click=add_photo_from_url)])]),
+            primary_button("Modifier l'annonce" if is_edit else t("publish_button"), do_publish, ft.Icons.EDIT if is_edit else ft.Icons.CHECK, expand=True),
             ft.Container(height=30),
         ])
         wrapped = ft.Container(padding=12, content=form_content)
 
-    return ft.View(route=f"/edit/{bien_id}" if is_edit else "/publish", bgcolor=COLORS["bg"], scroll=ft.ScrollMode.AUTO, appbar=ft.AppBar(leading=ft.IconButton(ft.icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/mes-annonces" if is_edit else "/home")), title=ft.Text("Modifier l'annonce" if is_edit else t("publish_title"), color="#FFFFFF", weight=ft.FontWeight.BOLD), bgcolor=COLORS["primary"]), controls=[wrapped])
+    return ft.View(route=f"/edit/{bien_id}" if is_edit else "/publish", bgcolor=COLORS["bg"], scroll=ft.ScrollMode.AUTO, appbar=ft.AppBar(leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/mes-annonces" if is_edit else "/home")), title=ft.Text("Modifier l'annonce" if is_edit else t("publish_title"), color="#FFFFFF", weight=ft.FontWeight.BOLD), bgcolor=COLORS["primary"]), controls=[wrapped])

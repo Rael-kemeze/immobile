@@ -30,9 +30,9 @@ def remote_config_view(page: ft.Page) -> ft.View:
     force_msg = ft.TextField(label="Message MAJ obligatoire", value=current.get("force_update_message","Mise a jour obligatoire"), border_radius=12, filled=True, bgcolor=SURFACE, dense=True)
     maint_msg = ft.TextField(label="Message maintenance", value=current.get("maintenance_message","Maintenance en cours"), border_radius=12, filled=True, bgcolor=SURFACE, dense=True)
     
-    mtn_num = ft.TextField(label="MTN MoMo", value=current.get("payment_methods",{}).get("mtn_number","6 70 12 34 56"), prefix_icon=ft.icons.PHONE_ANDROID, border_radius=12, filled=True, bgcolor=SURFACE, dense=True)
-    orange_num = ft.TextField(label="Orange Money", value=current.get("payment_methods",{}).get("orange_number","6 90 12 34 56"), prefix_icon=ft.icons.PHONE, border_radius=12, filled=True, bgcolor=SURFACE, dense=True)
-    wa_num = ft.TextField(label="WhatsApp", value=current.get("payment_methods",{}).get("whatsapp","6 70 12 34 56"), prefix_icon=ft.icons.CHAT_BUBBLE, border_radius=12, filled=True, bgcolor=SURFACE, dense=True)
+    mtn_num = ft.TextField(label="MTN MoMo", value=current.get("payment_methods",{}).get("mtn_number","6 70 12 34 56"), prefix_icon=ft.Icons.PHONE_ANDROID, border_radius=12, filled=True, bgcolor=SURFACE, dense=True)
+    orange_num = ft.TextField(label="Orange Money", value=current.get("payment_methods",{}).get("orange_number","6 90 12 34 56"), prefix_icon=ft.Icons.PHONE, border_radius=12, filled=True, bgcolor=SURFACE, dense=True)
+    wa_num = ft.TextField(label="WhatsApp", value=current.get("payment_methods",{}).get("whatsapp","6 70 12 34 56"), prefix_icon=ft.Icons.CHAT_BUBBLE, border_radius=12, filled=True, bgcolor=SURFACE, dense=True)
     
     apk_url = ft.TextField(label="URL APK", value=current.get("apk_url","https://immobile.cm/download/immobile.apk"), border_radius=12, filled=True, bgcolor=SURFACE, dense=True)
     dl_url = ft.TextField(label="URL Site", value=current.get("download_url","https://immobile.cm"), border_radius=12, filled=True, bgcolor=SURFACE, dense=True)
@@ -143,7 +143,7 @@ def remote_config_view(page: ft.Page) -> ft.View:
         gradient=ft.LinearGradient(begin=ft.alignment.top_left, end=ft.alignment.bottom_right, colors=[PRIMARY, PRIMARY_DARK]),
         content=ft.Column(spacing=12, controls=[
             ft.Row(spacing=12, controls=[
-                ft.Container(width=48, height=48, bgcolor="#FFFFFF22", border_radius=14, alignment=ft.alignment.center, content=ft.Icon(ft.icons.SETTINGS_REMOTE, color="white", size=26)),
+                ft.Container(width=48, height=48, bgcolor="#FFFFFF22", border_radius=14, alignment=ft.alignment.center, content=ft.Icon(ft.Icons.SETTINGS_REMOTE, color="white", size=26)),
                 ft.Column(expand=True, spacing=2, controls=[
                     ft.Text("Controle a Distance", size=18, weight=ft.FontWeight.BOLD, color="white"),
                     ft.Text("Gere ton app sans republier", size=11, color="#CBD5E1"),
@@ -155,14 +155,14 @@ def remote_config_view(page: ft.Page) -> ft.View:
             ]),
             ft.Row(spacing=8, controls=[
                 ft.Container(expand=True, bgcolor="#FFFFFF15", border_radius=12, padding=10, content=ft.Row(spacing=8, controls=[
-                    ft.Icon(ft.icons.PEOPLE_OUTLINE, size=16, color="white"),
+                    ft.Icon(ft.Icons.PEOPLE_OUTLINE, size=16, color="white"),
                     ft.Column(spacing=0, controls=[
                         ft.Text("Mode", size=10, color="#94A3B8"),
                         ft.Text("Payant" if current.get("enable_monetization") else "Gratuit", size=12, weight=ft.FontWeight.BOLD, color="white"),
                     ])
                 ])),
                 ft.Container(expand=True, bgcolor="#FFFFFF15", border_radius=12, padding=10, content=ft.Row(spacing=8, controls=[
-                    ft.Icon(ft.icons.PHONE_ANDROID, size=16, color="white"),
+                    ft.Icon(ft.Icons.PHONE_ANDROID, size=16, color="white"),
                     ft.Column(spacing=0, controls=[
                         ft.Text("APK", size=10, color="#94A3B8"),
                         ft.Text(f"Code {current.get('version_code',100)}", size=12, weight=ft.FontWeight.BOLD, color="white"),
@@ -172,7 +172,7 @@ def remote_config_view(page: ft.Page) -> ft.View:
         ])
     )
 
-    card_monet = card(ft.icons.PAYMENTS_ROUNDED, "Monetisation", "Active le paiement", [
+    card_monet = card(ft.Icons.PAYMENTS_ROUNDED, "Monetisation", "Active le paiement", [
         ft.Container(bgcolor="#F8FAFC", border_radius=12, padding=12, content=ft.Row(spacing=12, controls=[
             ft.Column(expand=True, spacing=4, controls=[
                 ft.Text("Paiement / Paywall", size=13, weight=ft.FontWeight.W_600),
@@ -182,11 +182,11 @@ def remote_config_view(page: ft.Page) -> ft.View:
             mon_switch,
         ])),
         ft.Row(spacing=8, controls=[
-            ft.Container(expand=True, content=ft.ElevatedButton("Activer", icon=ft.icons.BOLT, style=ft.ButtonStyle(bgcolor=PRIMARY, color="white", shape=ft.RoundedRectangleBorder(radius=10)), on_click=lambda e: quick_toggle(True, mon_switch))),
+            ft.Container(expand=True, content=ft.ElevatedButton("Activer", icon=ft.Icons.BOLT, style=ft.ButtonStyle(bgcolor=PRIMARY, color="white", shape=ft.RoundedRectangleBorder(radius=10)), on_click=lambda e: quick_toggle(True, mon_switch))),
             ft.Container(expand=True, content=ft.OutlinedButton("Desactiver", style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)), on_click=lambda e: quick_toggle(False, mon_switch))),
         ]),
         ft.Container(bgcolor="#FFFBEB", border_radius=12, padding=12, border=ft.border.all(1, "#FDE68A"), content=ft.Row(spacing=10, controls=[
-            ft.Icon(ft.icons.LIGHTBULB_OUTLINE, size=18, color="#D97706"),
+            ft.Icon(ft.Icons.LIGHTBULB_OUTLINE, size=18, color="#D97706"),
             ft.Column(expand=True, spacing=2, controls=[
                 ft.Text("Mode Boost seulement", size=12, weight=ft.FontWeight.BOLD, color="#92400E"),
                 ft.Row(spacing=8, controls=[ft.Text("Gratuit + option Boost", size=11, color="#92400E", expand=True), boost_switch])
@@ -194,7 +194,7 @@ def remote_config_view(page: ft.Page) -> ft.View:
         ])),
     ], PRIMARY)
 
-    card_versions = card(ft.icons.SYSTEM_UPDATE_ROUNDED, "Versions APK", "Force les mises a jour", [
+    card_versions = card(ft.Icons.SYSTEM_UPDATE_ROUNDED, "Versions APK", "Force les mises a jour", [
         ft.Row(spacing=10, controls=[latest_ver, ver_code]),
         ft.Row(spacing=10, controls=[min_ver, min_code]),
         status_ver,
@@ -207,15 +207,15 @@ def remote_config_view(page: ft.Page) -> ft.View:
         force_msg,
     ], "#0EA5E9")
 
-    card_pay = card(ft.icons.ACCOUNT_BALANCE_WALLET_ROUNDED, "Mobile Money", "Numeros affiches au paiement", [
+    card_pay = card(ft.Icons.ACCOUNT_BALANCE_WALLET_ROUNDED, "Mobile Money", "Numeros affiches au paiement", [
         mtn_num, orange_num, wa_num,
     ], ACCENT)
 
-    card_links = card(ft.icons.LINK_ROUNDED, "Liens", "Distribution APK", [
+    card_links = card(ft.Icons.LINK_ROUNDED, "Liens", "Distribution APK", [
         apk_url, dl_url,
     ], "#8B5CF6")
 
-    card_maint = card(ft.icons.BUILD_ROUNDED, "Maintenance", "Bloque l'app", [
+    card_maint = card(ft.Icons.BUILD_ROUNDED, "Maintenance", "Bloque l'app", [
         ft.Row(spacing=12, controls=[
             ft.Column(expand=True, spacing=4, controls=[ft.Text("Mode maintenance", size=13, weight=ft.FontWeight.W_600), ft.Text("Affiche ecran maintenance", size=11, color=MUTED)]),
             maint_switch,
@@ -229,7 +229,7 @@ def remote_config_view(page: ft.Page) -> ft.View:
         shadow=ft.BoxShadow(blur_radius=20, color="#0F6B3E30", offset=ft.Offset(0,6)),
         content=ft.ElevatedButton(
             "Sauvegarder",
-            icon=ft.icons.SAVE_ROUNDED,
+            icon=ft.Icons.SAVE_ROUNDED,
             style=ft.ButtonStyle(bgcolor="transparent", color="white", shadow_color="transparent", padding=ft.padding.symmetric(16,20), shape=ft.RoundedRectangleBorder(radius=16), text_style=ft.TextStyle(size=14, weight=ft.FontWeight.BOLD)),
             on_click=save_config,
             expand=True,
@@ -253,6 +253,6 @@ def remote_config_view(page: ft.Page) -> ft.View:
         bgcolor=BG,
         padding=16,
         scroll=ft.ScrollMode.AUTO,
-        appbar=ft.AppBar(title=ft.Text("Controle a Distance", size=16, weight=ft.FontWeight.BOLD, color="white"), bgcolor=PRIMARY, elevation=0, leading=ft.IconButton(ft.icons.ARROW_BACK_ROUNDED, icon_color="white", on_click=lambda e: page.go("/admin"))),
+        appbar=ft.AppBar(title=ft.Text("Controle a Distance", size=16, weight=ft.FontWeight.BOLD, color="white"), bgcolor=PRIMARY, elevation=0, leading=ft.IconButton(ft.Icons.ARROW_BACK_ROUNDED, icon_color="white", on_click=lambda e: page.go("/admin"))),
         controls=[content]
     )

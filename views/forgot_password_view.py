@@ -32,7 +32,7 @@ def _logo():
         spacing=6,
         controls=[
             ft.Container(width=76, height=76, bgcolor=COLORS["primary"], border_radius=22, alignment=ft.alignment.center,
-                content=ft.Icon(ft.icons.HOME_WORK_ROUNDED, size=40, color="#FFFFFF")),
+                content=ft.Icon(ft.Icons.HOME_WORK_ROUNDED, size=40, color="#FFFFFF")),
             ft.Text(APP_CONFIG["APP_NAME"], size=28, weight=ft.FontWeight.BOLD, color=COLORS["primary"], text_align=ft.TextAlign.CENTER),
             ft.Text("Récupération de mot de passe", size=13, color=COLORS["muted"], text_align=ft.TextAlign.CENTER),
         ],
@@ -48,7 +48,7 @@ def _auth_container(page: ft.Page, controls: list) -> ft.Control:
     )
 
 def forgot_password_view(page: ft.Page) -> ft.View:
-    phone = text_field(t("phone_label"), prefix_icon=ft.icons.PHONE)
+    phone = text_field(t("phone_label"), prefix_icon=ft.Icons.PHONE)
     phone.value = get_dial(DEFAULT_COUNTRY_CODE)
 
     def do_request(e):
@@ -83,7 +83,7 @@ def forgot_password_view(page: ft.Page) -> ft.View:
         ft.Container(height=10),
         phone,
         ft.Container(height=8),
-        primary_button("Recevoir le code sur WhatsApp", do_request, ft.icons.SEND, expand=True),
+        primary_button("Recevoir le code sur WhatsApp", do_request, ft.Icons.SEND, expand=True),
         ft.Row(alignment=ft.MainAxisAlignment.CENTER, controls=[
             ft.TextButton("Retour connexion", on_click=lambda e: page.go("/login")),
             ft.TextButton("Créer un compte", on_click=lambda e: page.go("/register")),
@@ -99,7 +99,7 @@ def verify_reset_otp_view(page: ft.Page) -> ft.View:
         return ft.View(route="/verify-reset-otp", controls=[ft.Text("Aucune demande en cours")])
 
     phone_display = d.get("phone", "")
-    otp_code = text_field("Code à 6 chiffres *", prefix_icon=ft.icons.VERIFIED_USER, keyboard_type=ft.KeyboardType.NUMBER)
+    otp_code = text_field("Code à 6 chiffres *", prefix_icon=ft.Icons.VERIFIED_USER, keyboard_type=ft.KeyboardType.NUMBER)
     info_text = ft.Text(f"Code envoyé au {phone_display} sur WhatsApp - Valable 5 min", size=12, color=COLORS["muted"], text_align=ft.TextAlign.CENTER)
 
     def do_verify(e):
@@ -124,13 +124,13 @@ def verify_reset_otp_view(page: ft.Page) -> ft.View:
         bgcolor="#FFFFFF", border_radius=18, padding=18,
         shadow=ft.BoxShadow(blur_radius=14, color="#1A00000D"),
         content=ft.Column(spacing=14, horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[
-            ft.Icon(ft.icons.VERIFIED_USER, size=48, color=COLORS["primary"]),
+            ft.Icon(ft.Icons.VERIFIED_USER, size=48, color=COLORS["primary"]),
             ft.Text("Vérifie ton numéro", size=20, weight=ft.FontWeight.BOLD, color=COLORS["text"], text_align=ft.TextAlign.CENTER),
             info_text, otp_code,
             ft.Container(height=4),
-            primary_button("Vérifier le code", do_verify, ft.icons.CHECK_CIRCLE, expand=True),
+            primary_button("Vérifier le code", do_verify, ft.Icons.CHECK_CIRCLE, expand=True),
             ft.Row(alignment=ft.MainAxisAlignment.CENTER, controls=[
-                ft.TextButton("Renvoyer le code", icon=ft.icons.REFRESH, on_click=do_resend),
+                ft.TextButton("Renvoyer le code", icon=ft.Icons.REFRESH, on_click=do_resend),
                 ft.TextButton("Changer numéro", on_click=lambda e: page.go("/forgot-password")),
             ])
         ]),
@@ -146,8 +146,8 @@ def reset_password_view(page: ft.Page) -> ft.View:
         return ft.View(route="/reset-password", controls=[ft.Text("Aucune demande en cours")])
 
     phone_display = d.get("phone", "")
-    new_pwd = text_field("Nouveau mot de passe *", password=True, can_reveal_password=True, prefix_icon=ft.icons.LOCK)
-    confirm_pwd = text_field("Confirmer mot de passe *", password=True, can_reveal_password=True, prefix_icon=ft.icons.LOCK)
+    new_pwd = text_field("Nouveau mot de passe *", password=True, can_reveal_password=True, prefix_icon=ft.Icons.LOCK)
+    confirm_pwd = text_field("Confirmer mot de passe *", password=True, can_reveal_password=True, prefix_icon=ft.Icons.LOCK)
 
     def do_reset(e):
         p1 = (new_pwd.value or "").strip()
@@ -179,11 +179,11 @@ def reset_password_view(page: ft.Page) -> ft.View:
             bgcolor="#FFFFFF", border_radius=18, padding=18,
             shadow=ft.BoxShadow(blur_radius=14, color="#1A00000D"),
             content=ft.Column(spacing=14, controls=[
-                ft.Icon(ft.icons.LOCK_RESET, size=48, color=COLORS["primary"]),
+                ft.Icon(ft.Icons.LOCK_RESET, size=48, color=COLORS["primary"]),
                 ft.Text("Nouveau mot de passe", size=20, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
                 ft.Text(f"Pour {phone_display}", size=12, color=COLORS["muted"], text_align=ft.TextAlign.CENTER),
                 new_pwd, confirm_pwd,
-                primary_button("Changer mon mot de passe", do_reset, ft.icons.CHECK, expand=True),
+                primary_button("Changer mon mot de passe", do_reset, ft.Icons.CHECK, expand=True),
             ])
         )
     ])

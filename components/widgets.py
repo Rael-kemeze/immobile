@@ -91,12 +91,12 @@ def outline_button(text: str, on_click, icon: Optional[str]=None, expand=False):
 def whatsapp_button(page: ft.Page, numero: str, expand: bool=True, label: str = None, bien: Dict[str, Any] = None):
     txt_label = label or t("whatsapp_contact")
     url = wa_url(numero, bien)
-    return ft.ElevatedButton(txt_label, icon=ft.icons.CHAT, expand=expand, height=46,
+    return ft.ElevatedButton(txt_label, icon=ft.Icons.CHAT, expand=expand, height=46,
         on_click=lambda e: page.launch_url(url),
         style=ft.ButtonStyle(bgcolor="#25D366", color="#FFFFFF", shape=ft.RoundedRectangleBorder(radius=12)))
 
 def call_button(page: ft.Page, numero: str, expand: bool=False):
-    return ft.ElevatedButton(f"Appeler {numero}", icon=ft.icons.CALL, expand=expand, height=46,
+    return ft.ElevatedButton(f"Appeler {numero}", icon=ft.Icons.CALL, expand=expand, height=46,
         on_click=lambda e: page.launch_url(call_url(numero)),
         style=ft.ButtonStyle(bgcolor=COLORS["primary"], color="#FFFFFF", shape=ft.RoundedRectangleBorder(radius=12)))
 
@@ -106,12 +106,12 @@ def phone_row(page: ft.Page, numero: str, label: str, bien: Dict[str, Any] = Non
         bgcolor="#F6F8F7", border_radius=12, padding=10, border=ft.border.all(1, "#E0E4E1"),
         content=ft.Column(spacing=8, controls=[
             ft.Row(spacing=6, controls=[
-                ft.Icon(ft.icons.PHONE, size=18, color=COLORS["primary"]),
+                ft.Icon(ft.Icons.PHONE, size=18, color=COLORS["primary"]),
                 ft.Text(label, size=12, color=COLORS["muted"], weight=ft.FontWeight.W_600),
                 ft.Text(numero, size=14, weight=ft.FontWeight.BOLD, color=COLORS["text"]),
             ]),
             ft.Row(spacing=8, controls=[
-                ft.Container(expand=True, content=ft.ElevatedButton("Appeler", icon=ft.icons.CALL, expand=True, height=40,
+                ft.Container(expand=True, content=ft.ElevatedButton("Appeler", icon=ft.Icons.CALL, expand=True, height=40,
                     on_click=lambda e: page.launch_url(call_url(numero)),
                     style=ft.ButtonStyle(bgcolor=COLORS["primary"], color="#FFFFFF", shape=ft.RoundedRectangleBorder(radius=10)))),
                 ft.Container(expand=True, content=whatsapp_button(page, numero, expand=True, label="WhatsApp", bien=bien)),
@@ -146,7 +146,7 @@ def is_desktop(page: ft.Page) -> bool:
 
 def app_bar(title: str, page: ft.Page, actions=None, show_back: bool=False):
     logo_widget = ft.Container(width=34, height=34, bgcolor="#FFFFFF", border_radius=9, alignment=ft.alignment.center,
-        content=ft.Icon(ft.icons.HOME_WORK_ROUNDED, size=20, color=COLORS["primary"]))
+        content=ft.Icon(ft.Icons.HOME_WORK_ROUNDED, size=20, color=COLORS["primary"]))
     title_widget = ft.Row(spacing=10, vertical_alignment=ft.CrossAxisAlignment.CENTER, controls=[logo_widget, ft.Text(title, weight=ft.FontWeight.BOLD, color="#FFFFFF", size=19)])
 
     def _safe_back(e):
@@ -160,7 +160,7 @@ def app_bar(title: str, page: ft.Page, actions=None, show_back: bool=False):
         page.go("/home")
 
     return ft.AppBar(
-        leading=(ft.IconButton(ft.icons.ARROW_BACK, icon_color="white", on_click=_safe_back) if show_back else None),
+        leading=(ft.IconButton(ft.Icons.ARROW_BACK, icon_color="white", on_click=_safe_back) if show_back else None),
         title=title_widget, bgcolor=COLORS["primary"], center_title=False, actions=actions or [])
 
 def avatar(user: Dict[str, Any], size: int=42):
@@ -197,7 +197,7 @@ def skeleton_card() -> ft.Container:
             ft.Container(padding=12, content=ft.Column(spacing=8, controls=[block(18, 120), block(14, 200), block(12, 140)])),
         ]))
 
-def empty_state(message: str, icon: str = ft.icons.SEARCH_OFF):
+def empty_state(message: str, icon: str = ft.Icons.SEARCH_OFF):
     return ft.Container(alignment=ft.alignment.center, padding=40,
         content=ft.Column(horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10, controls=[
             ft.Icon(icon, size=54, color=COLORS["muted"]),
@@ -220,7 +220,7 @@ def password_card(page: ft.Page, title: Optional[str] = None) -> ft.Container:
         content=ft.Column(spacing=10, controls=[
             ft.Text(title or t("change_password"), weight=ft.FontWeight.BOLD),
             current, new, confirm,
-            primary_button(t("save_button"), submit, ft.icons.SAVE, expand=True),
+            primary_button(t("save_button"), submit, ft.Icons.SAVE, expand=True),
         ]))
 
 _PICKERS: Dict[str, Any] = {}
@@ -309,8 +309,8 @@ def admin_actions(page: ft.Page, bien: Dict[str, Any], on_changed: Optional[Call
         if on_changed:
             on_changed()
     return ft.Row(spacing=8, controls=[
-        ft.Container(expand=True, content=ft.OutlinedButton(t("delete_button"), icon=ft.icons.DELETE_OUTLINE, on_click=lambda e: ask(t("confirm_delete_listing"), t("delete_button"), do_delete), style=ft.ButtonStyle(color=COLORS["danger"], side=ft.BorderSide(1, COLORS["danger"])))),
-        ft.Container(expand=True, content=ft.OutlinedButton(t("block_button"), icon=ft.icons.BLOCK, on_click=lambda e: ask(t("confirm_block_user"), t("block_button"), do_block), style=ft.ButtonStyle(color=COLORS["danger"], side=ft.BorderSide(1, COLORS["danger"])))),
+        ft.Container(expand=True, content=ft.OutlinedButton(t("delete_button"), icon=ft.Icons.DELETE_OUTLINE, on_click=lambda e: ask(t("confirm_delete_listing"), t("delete_button"), do_delete), style=ft.ButtonStyle(color=COLORS["danger"], side=ft.BorderSide(1, COLORS["danger"])))),
+        ft.Container(expand=True, content=ft.OutlinedButton(t("block_button"), icon=ft.Icons.BLOCK, on_click=lambda e: ask(t("confirm_block_user"), t("block_button"), do_block), style=ft.ButtonStyle(color=COLORS["danger"], side=ft.BorderSide(1, COLORS["danger"])))),
     ])
 
 class CountryCitySelector:
@@ -408,13 +408,13 @@ def bien_card(page: ft.Page, bien: Dict[str, Any], on_open: Callable, on_changed
                         padding=ft.padding.symmetric(4,8),
                         border_radius=20,
                         content=ft.Row(spacing=4, controls=[
-                            ft.Icon(ft.icons.ROCKET_LAUNCH, size=12, color="#FFFFFF"),
+                            ft.Icon(ft.Icons.ROCKET_LAUNCH, size=12, color="#FFFFFF"),
                             ft.Text("SPONSORISÉ", size=10, weight=ft.FontWeight.BOLD, color="#FFFFFF"),
                         ])
                     ),
                 ])),
                 ft.Container(top=10, right=10, content=ft.IconButton(
-                    icon=ft.icons.FAVORITE if is_fav else ft.icons.FAVORITE_BORDER,
+                    icon=ft.Icons.FAVORITE if is_fav else ft.Icons.FAVORITE_BORDER,
                     icon_color="#FF3B30" if is_fav else "#FFFFFF",
                     bgcolor="#00000088", on_click=toggle_fav
                 ))
@@ -422,7 +422,7 @@ def bien_card(page: ft.Page, bien: Dict[str, Any], on_open: Callable, on_changed
             ft.Container(padding=12, content=ft.Column(spacing=6, controls=[
                 ft.Text(bien.get("titre",""), weight=ft.FontWeight.BOLD, size=15, max_lines=2, overflow=ft.TextOverflow.ELLIPSIS),
                 ft.Row(spacing=6, controls=[
-                    ft.Icon(ft.icons.LOCATION_ON_OUTLINED, size=15, color=COLORS["muted"]),
+                    ft.Icon(ft.Icons.LOCATION_ON_OUTLINED, size=15, color=COLORS["muted"]),
                     flag_image(bien.get("country_code","CM"), size=14),
                     ft.Text(f"{bien.get('city')} - {bien.get('locality')}", size=12, color=COLORS["muted"]),
                 ]),

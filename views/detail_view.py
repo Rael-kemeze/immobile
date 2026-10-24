@@ -117,36 +117,36 @@ def detail_view(page: ft.Page, bien_id: str) -> ft.View:
         if isinstance(nb_cuisines_display, str) and nb_cuisines_display and not nb_cuisines_display.isdigit():
             return ft.Container(expand=True, bgcolor="#FFF3E0", border_radius=12, padding=12, border=ft.border.all(1, "#FFE0B2"),
                 content=ft.Column(spacing=5, horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[
-                    ft.Icon(ft.icons.KITCHEN_OUTLINED, size=26, color="#E76F51"),
+                    ft.Icon(ft.Icons.KITCHEN_OUTLINED, size=26, color="#E76F51"),
                     ft.Text(nb_cuisines_display, size=14, weight=ft.FontWeight.BOLD, color=COLORS["text"], text_align=ft.TextAlign.CENTER),
                     ft.Text("Cuisine", size=11, color=COLORS["muted"]),
                 ]))
         else:
-            return _spec_item(ft.icons.KITCHEN_OUTLINED, "Cuisines", nb_cuisines_val, "#E76F51")
+            return _spec_item(ft.Icons.KITCHEN_OUTLINED, "Cuisines", nb_cuisines_val, "#E76F51")
 
     def _cuisine_item():
         if isinstance(nb_cuisines_display, str) and not nb_cuisines_display.isdigit():
             return ft.Container(expand=True, bgcolor="#FFF3E0", border_radius=12, padding=12, border=ft.border.all(1, "#FFE0B2"),
                 content=ft.Column(spacing=5, horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[
-                    ft.Icon(ft.icons.KITCHEN_OUTLINED, size=26, color="#E76F51"),
+                    ft.Icon(ft.Icons.KITCHEN_OUTLINED, size=26, color="#E76F51"),
                     ft.Text(nb_cuisines_display, size=14, weight=ft.FontWeight.BOLD, color=COLORS["text"], text_align=ft.TextAlign.CENTER),
                     ft.Text("Cuisine", size=11, color=COLORS["muted"]),
                 ]))
         else:
-            return _spec_item(ft.icons.KITCHEN_OUTLINED, "Cuisines", nb_cuisines_val, "#E76F51")
+            return _spec_item(ft.Icons.KITCHEN_OUTLINED, "Cuisines", nb_cuisines_val, "#E76F51")
 
     spec_row1 = ft.Row(spacing=10, controls=[
-        _spec_item(ft.icons.BED_OUTLINED, "Chambres", nb_chambres, "#0F6B3F"),
-        _spec_item(ft.icons.BATHTUB_OUTLINED, "Douches", nb_douches, "#1976D2"),
+        _spec_item(ft.Icons.BED_OUTLINED, "Chambres", nb_chambres, "#0F6B3F"),
+        _spec_item(ft.Icons.BATHTUB_OUTLINED, "Douches", nb_douches, "#1976D2"),
     ])
     spec_row2 = ft.Row(spacing=10, controls=[
-        _spec_item(ft.icons.WEEKEND_OUTLINED, "Salons", nb_salons, "#6A4C93"),
+        _spec_item(ft.Icons.WEEKEND_OUTLINED, "Salons", nb_salons, "#6A4C93"),
         _cuisine_item(),
     ])
 
     country = get_country(bien.get("country_code"))
     location_row = ft.Row(spacing=6, controls=[
-        ft.Icon(ft.icons.LOCATION_ON_OUTLINED, size=16, color=COLORS["muted"]),
+        ft.Icon(ft.Icons.LOCATION_ON_OUTLINED, size=16, color=COLORS["muted"]),
         flag_image(bien.get("country_code", "CM"), size=16),
         ft.Text(f"{bien.get('city','')} - {bien.get('locality','')} • {country_label(country)}", size=12, color=COLORS["muted"]),
     ])
@@ -199,7 +199,7 @@ def detail_view(page: ft.Page, bien_id: str) -> ft.View:
             cond_items.append(ft.Container(
                 expand=True, bgcolor="#E8F5E9", border_radius=12, padding=12, border=ft.border.all(1, "#C8E6C9"),
                 content=ft.Column(spacing=4, horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[
-                    ft.Icon(ft.icons.CALENDAR_MONTH_OUTLINED, size=24, color=COLORS["primary"]),
+                    ft.Icon(ft.Icons.CALENDAR_MONTH_OUTLINED, size=24, color=COLORS["primary"]),
                     ft.Text(f"{avance_val} mois", size=18, weight=ft.FontWeight.BOLD, color=COLORS["text"]),
                     ft.Text("Avance", size=11, color=COLORS["muted"]),
                 ])
@@ -208,7 +208,7 @@ def detail_view(page: ft.Page, bien_id: str) -> ft.View:
             cond_items.append(ft.Container(
                 expand=True, bgcolor="#FFF3E0", border_radius=12, padding=12, border=ft.border.all(1, "#FFE0B2"),
                 content=ft.Column(spacing=4, horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[
-                    ft.Icon(ft.icons.SECURITY_OUTLINED, size=24, color="#E76F51"),
+                    ft.Icon(ft.Icons.SECURITY_OUTLINED, size=24, color="#E76F51"),
                     ft.Text(f"{caution_val} mois", size=18, weight=ft.FontWeight.BOLD, color=COLORS["text"]),
                     ft.Text("Caution", size=11, color=COLORS["muted"]),
                 ])
@@ -221,7 +221,7 @@ def detail_view(page: ft.Page, bien_id: str) -> ft.View:
                 cond_items.append(ft.Container(
                     expand=True, bgcolor="#E3F2FD", border_radius=12, padding=12, border=ft.border.all(1, "#BBDEFB"),
                     content=ft.Column(spacing=4, horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[
-                        ft.Icon(ft.icons.PAYMENTS_OUTLINED, size=24, color="#1976D2"),
+                        ft.Icon(ft.Icons.PAYMENTS_OUTLINED, size=24, color="#1976D2"),
                         ft.Text(f"{total:,}".replace(","," "), size=16, weight=ft.FontWeight.BOLD, color=COLORS["text"]),
                         ft.Text(f"Total entrée ({avance_val+caution_val} mois)", size=10, color=COLORS["muted"], text_align=ft.TextAlign.CENTER),
                     ])
@@ -234,7 +234,7 @@ def detail_view(page: ft.Page, bien_id: str) -> ft.View:
                 bgcolor="#FFFFFF", border_radius=14, padding=14, border=ft.border.all(1, "#E0E4E1"),
                 content=ft.Column(spacing=10, controls=[
                     ft.Row(spacing=8, controls=[
-                        ft.Icon(ft.icons.RECEIPT_LONG_OUTLINED, size=18, color=COLORS["primary"]),
+                        ft.Icon(ft.Icons.RECEIPT_LONG_OUTLINED, size=18, color=COLORS["primary"]),
                         ft.Text("Conditions de location", weight=ft.FontWeight.BOLD, size=15),
                     ]),
                     ft.Row(spacing=10, controls=cond_items),
@@ -282,10 +282,10 @@ def detail_view(page: ft.Page, bien_id: str) -> ft.View:
     action_bloc = ft.Container(bgcolor="#FFFFFF", border_radius=14, padding=14, border=ft.border.all(1, "#E0E4E1"),
         content=ft.Column(spacing=10, controls=[
             ft.Row(spacing=10, controls=[
-                ft.Container(expand=True, content=ft.IconButton(icon=ft.icons.FAVORITE if is_fav else ft.icons.FAVORITE_BORDER, icon_color="#FF3B30", bgcolor="#FFF0F0", on_click=toggle_fav)),
+                ft.Container(expand=True, content=ft.IconButton(icon=ft.Icons.FAVORITE if is_fav else ft.Icons.FAVORITE_BORDER, icon_color="#FF3B30", bgcolor="#FFF0F0", on_click=toggle_fav)),
                 ft.Container(expand=True, content=ft.ElevatedButton(
                     "Modifier mon annonce",
-                    icon=ft.icons.EDIT,
+                    icon=ft.Icons.EDIT,
                     visible=is_owner or is_admin,
                     on_click=lambda e: page.go(f"/edit/{bien['id']}"),
                     style=ft.ButtonStyle(bgcolor=COLORS["primary"], color="#FFFFFF", shape=ft.RoundedRectangleBorder(radius=12)),

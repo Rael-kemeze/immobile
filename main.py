@@ -43,7 +43,7 @@ def maintenance_view(page: ft.Page) -> ft.View:
         vertical_alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
-            ft.Icon(ft.icons.BUILD_CIRCLE, size=80, color=COLORS["accent"]),
+            ft.Icon(ft.Icons.BUILD_CIRCLE, size=80, color=COLORS["accent"]),
             ft.Text(
                 "Maintenance en cours",
                 size=24,

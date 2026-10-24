@@ -28,7 +28,7 @@ def _appbar(title: str, page: ft.Page, actions=None):
         title=ft.Text(title, color="#FFFFFF"),
         bgcolor=COLORS["primary"],
         leading=ft.IconButton(
-            ft.icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/home")
+            ft.Icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/home")
         ),
         actions=actions or [],
     )
@@ -47,7 +47,7 @@ def favoris_view(page: ft.Page) -> ft.View:
             for b in biens
         ]
         if biens
-        else [empty_state(t("no_favorites"), ft.icons.FAVORITE_BORDER)]
+        else [empty_state(t("no_favorites"), ft.Icons.FAVORITE_BORDER)]
     )
     return ft.View(
         route="/favoris",
@@ -111,13 +111,13 @@ def mes_annonces_view(page: ft.Page) -> ft.View:
                         ),
                         ft.Column(spacing=2, controls=[
                             ft.IconButton(
-                                ft.icons.EDIT_OUTLINED,
+                                ft.Icons.EDIT_OUTLINED,
                                 icon_color=COLORS["primary"],
                                 tooltip="Modifier",
                                 on_click=edit,
                             ),
                             ft.IconButton(
-                                ft.icons.DELETE_OUTLINE,
+                                ft.Icons.DELETE_OUTLINE,
                                 icon_color=COLORS["danger"],
                                 tooltip="Supprimer",
                                 on_click=delete,
@@ -134,9 +134,9 @@ def mes_annonces_view(page: ft.Page) -> ft.View:
         padding=14,
         scroll=ft.ScrollMode.AUTO,
         appbar=_appbar(t("my_listings_title"), page),
-        controls=rows or [empty_state(t("no_listings"), ft.icons.LIST_ALT)],
+        controls=rows or [empty_state(t("no_listings"), ft.Icons.LIST_ALT)],
         floating_action_button=ft.FloatingActionButton(
-            icon=ft.icons.ADD, bgcolor=COLORS["accent"], on_click=lambda e: page.go("/publish")
+            icon=ft.Icons.ADD, bgcolor=COLORS["accent"], on_click=lambda e: page.go("/publish")
         ),
         navigation_bar=bottom_bar(page, 2),
     )
@@ -159,10 +159,10 @@ def profile_view(page: ft.Page) -> ft.View:
     locality = text_field(t("zone_label"), value=user.get("locality", ""))
 
     avatar_box = ft.Container(content=avatar(user, 96))
-    photo_btn = ft.OutlinedButton(icon=ft.icons.ADD_A_PHOTO_OUTLINED)
+    photo_btn = ft.OutlinedButton(icon=ft.Icons.ADD_A_PHOTO_OUTLINED)
     remove_btn = ft.TextButton(
         t("remove_photo"),
-        icon=ft.icons.DELETE_OUTLINE,
+        icon=ft.Icons.DELETE_OUTLINE,
         style=ft.ButtonStyle(color=COLORS["danger"]),
     )
 
@@ -229,30 +229,30 @@ def profile_view(page: ft.Page) -> ft.View:
                 bgcolor="#FFFFFF", border_radius=14, padding=8, border=ft.border.all(1, "#E0E4E1"),
                 content=ft.Column(spacing=0, controls=[
                     ft.ListTile(
-                        leading=ft.Icon(ft.icons.SETTINGS, color=COLORS["primary"]),
+                        leading=ft.Icon(ft.Icons.SETTINGS, color=COLORS["primary"]),
                         title=ft.Text("Paramètres"),
                         subtitle=ft.Text("Langue, pays, sécurité", size=11, color=COLORS["muted"]),
-                        trailing=ft.Icon(ft.icons.CHEVRON_RIGHT),
+                        trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
                         on_click=go_settings,
                     ),
                     ft.Divider(height=1),
                     ft.ListTile(
-                        leading=ft.Icon(ft.icons.NOTIFICATIONS_ACTIVE_OUTLINED, color=COLORS["primary"]),
+                        leading=ft.Icon(ft.Icons.NOTIFICATIONS_ACTIVE_OUTLINED, color=COLORS["primary"]),
                         title=ft.Text("Configuration des alertes"),
                         subtitle=ft.Text("Recevoir une alerte par zone", size=11, color=COLORS["muted"]),
-                        trailing=ft.Icon(ft.icons.CHEVRON_RIGHT),
+                        trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
                         on_click=go_alerts,
                     ),
                     ft.Divider(height=1),
                     ft.ListTile(
-                        leading=ft.Icon(ft.icons.NOTIFICATIONS_OUTLINED, color=COLORS["primary"]),
+                        leading=ft.Icon(ft.Icons.NOTIFICATIONS_OUTLINED, color=COLORS["primary"]),
                         title=ft.Text("Notifications"),
-                        trailing=ft.Icon(ft.icons.CHEVRON_RIGHT),
+                        trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
                         on_click=lambda e: page.go("/notifications"),
                     ),
                 ])
             ),
-            ft.OutlinedButton(t("logout_button"), icon=ft.icons.LOGOUT, on_click=logout),
+            ft.OutlinedButton(t("logout_button"), icon=ft.Icons.LOGOUT, on_click=logout),
             ft.Container(height=20),
         ],
     )
@@ -264,10 +264,10 @@ def profile_view(page: ft.Page) -> ft.View:
         appbar=ft.AppBar(
             title=ft.Text(t("profile_title"), color="#FFFFFF"),
             bgcolor=COLORS["primary"],
-            leading=ft.IconButton(ft.icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/home")),
+            leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/home")),
             actions=[
-                ft.IconButton(ft.icons.NOTIFICATIONS_ACTIVE_OUTLINED, icon_color="#FFFFFF", tooltip="Alertes", on_click=go_alerts),
-                ft.IconButton(ft.icons.SETTINGS, icon_color="#FFFFFF", tooltip="Paramètres", on_click=go_settings),
+                ft.IconButton(ft.Icons.NOTIFICATIONS_ACTIVE_OUTLINED, icon_color="#FFFFFF", tooltip="Alertes", on_click=go_alerts),
+                ft.IconButton(ft.Icons.SETTINGS, icon_color="#FFFFFF", tooltip="Paramètres", on_click=go_settings),
             ],
         ),
         controls=[content],
@@ -303,6 +303,6 @@ def notifications_view(page: ft.Page) -> ft.View:
         padding=14,
         scroll=ft.ScrollMode.AUTO,
         appbar=_appbar(t("notifications_title"), page),
-        controls=controls or [empty_state(t("no_notifications"), ft.icons.NOTIFICATIONS_NONE)],
+        controls=controls or [empty_state(t("no_notifications"), ft.Icons.NOTIFICATIONS_NONE)],
         navigation_bar=bottom_bar(page, 0),
     )

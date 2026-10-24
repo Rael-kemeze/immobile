@@ -13,7 +13,7 @@ def _appbar(page: ft.Page) -> ft.AppBar:
     return ft.AppBar(
         title=ft.Text(t("alerts_title"), color="#FFFFFF"),
         bgcolor=COLORS["primary"],
-        leading=ft.IconButton(ft.icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/settings")),
+        leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/settings")),
     )
 
 def alerts_view(page: ft.Page) -> ft.View:
@@ -38,7 +38,7 @@ def alerts_view(page: ft.Page) -> ft.View:
                             ft.Text(label(get_country(a.get("country"))), weight=ft.FontWeight.W_600, size=13),
                             ft.Text(f"{a.get('city')} - {a.get('zone')}", size=12, color=COLORS["muted"]),
                         ]),
-                        ft.IconButton(ft.icons.DELETE_OUTLINE, icon_color=COLORS["danger"], tooltip=t("delete_alert"), on_click=lambda e, aid=a["id"]: delete_alert(aid)),
+                        ft.IconButton(ft.Icons.DELETE_OUTLINE, icon_color=COLORS["danger"], tooltip=t("delete_alert"), on_click=lambda e, aid=a["id"]: delete_alert(aid)),
                     ]),
                 ) for a in rows
             ]
@@ -73,7 +73,7 @@ def alerts_view(page: ft.Page) -> ft.View:
             ft.Text("Soyez notifié dès qu'un bien est publié dans votre zone", size=12, color=COLORS["muted"]),
             *geo.controls,
             zone_field,
-            primary_button("Créer l'alerte", create_alert, ft.icons.NOTIFICATIONS_ACTIVE, expand=True),
+            primary_button("Créer l'alerte", create_alert, ft.Icons.NOTIFICATIONS_ACTIVE, expand=True),
         ])
     )
 
