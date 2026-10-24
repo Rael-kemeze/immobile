@@ -10,34 +10,35 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
+      
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.2'
           channel: 'stable'
 
-      - name: Install deps - FLET 0.28.3
+      - name: Install deps
         run: |
           sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev || true
           yes | flutter doctor --android-licenses || true
-          python -m pip install --upgrade pip
-          pip install flet==0.28.3 pyinstaller==6.10.0 supabase==2.9.1 python-dotenv==1.0.1 cloudinary Pillow httpx requests
-          flet --version
+          pip install flet==0.28.3 supabase python-dotenv cloudinary Pillow httpx
 
-      - name: Fix pyproject.toml
+      - name: Fix pyproject
         run: |
           python3 << 'PY'
           open("pyproject.toml","w").write('[project]\nname="immobile"\nversion="1.0.1"\nrequires-python=">=3.9"\ndependencies=["flet==0.28.3","supabase==2.9.1","python-dotenv==1.0.1","cloudinary","Pillow"]\n\n[tool.flet]\norg="com.immobile.cameroun"\nproject="immobile"\nmain="main.py"\nassets_dir="assets"\n')
           PY
           cat pyproject.toml
 
-      - name: Create .env
+      - name: Create secrets
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -45,6 +46,7 @@ jobs:
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
+          mkdir -p assets
           cat > .env <<EOF
           SUPABASE_URL=$SUPABASE_URL
           SUPABASE_KEY=$SUPABASE_KEY
@@ -52,22 +54,24 @@ jobs:
           CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME
           CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
           CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
+          CLOUDINARY_FOLDER=immobile
           OTP_MODE=disabled
           EOF
-          ls -la
+          cp .env assets/.env
+          cat .env
+          echo "=== .env créé et copié dans assets/.env ==="
 
-      - name: Build APK - Flet 0.28.3
+      - name: Build APK
         run: |
           flet build apk --project immobile --verbose 2>&1 | tee build.log
-          echo "=== APK SEARCH ==="
+          echo "=== APK TROUVÉS ==="
           find . -name "*.apk" -type f -exec ls -lh {} \;
-          tail -80 build.log
 
-      - name: Upload APK
+      - name: Upload APK SEULEMENT (40 Mo)
         uses: actions/upload-artifact@v4
         with:
           name: immobile-apk
           path: |
-            **/*.apk
-            build.log
+            build/flutter/build/app/outputs/flutter-apk/*.apk
+            build/**/*.apk
           if-no-files-found: error
