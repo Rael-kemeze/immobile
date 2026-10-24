@@ -7,60 +7,37 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Setup Flutter 3.24.5
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.5'
+          flutter-version: '3.29.2'
           channel: 'stable'
 
-      - name: Install system deps and Python deps
+      - name: Install deps - FLET 0.28.3
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev || true
+          sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev || true
           yes | flutter doctor --android-licenses || true
-          flutter doctor -v
           python -m pip install --upgrade pip
-          pip install flet==0.27.1 pyinstaller==6.10.0 supabase==2.9.1 python-dotenv==1.0.1 cloudinary Pillow httpx requests
+          pip install flet==0.28.3 pyinstaller==6.10.0 supabase==2.9.1 python-dotenv==1.0.1 cloudinary Pillow httpx requests
+          flet --version
 
-      - name: Fix pyproject.toml - SANS espaces
+      - name: Fix pyproject.toml
         run: |
           python3 << 'PY'
-          content = """[project]
-          name = "immobile"
-          version = "1.0.1"
-          description = "IMMOBILE Cameroun"
-          requires-python = ">=3.9"
-          dependencies = ["flet==0.27.1","supabase==2.9.1","python-dotenv==1.0.1","cloudinary","Pillow"]
-
-          [tool.flet]
-          org = "com.immobile.cameroun"
-          project = "immobile"
-          description = "IMMOBILE"
-          main = "main.py"
-          assets_dir = "assets"
-          """
-          open("pyproject.toml","w",encoding="utf-8").write(content)
-          print("=== pyproject.toml ===")
-          print(open("pyproject.toml",encoding="utf-8").read())
+          open("pyproject.toml","w").write('[project]\nname="immobile"\nversion="1.0.1"\nrequires-python=">=3.9"\ndependencies=["flet==0.28.3","supabase==2.9.1","python-dotenv==1.0.1","cloudinary","Pillow"]\n\n[tool.flet]\norg="com.immobile.cameroun"\nproject="immobile"\nmain="main.py"\nassets_dir="assets"\n')
           PY
+          cat pyproject.toml
 
-      - name: Create .env from secrets
+      - name: Create .env
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -75,25 +52,16 @@ jobs:
           CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME
           CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
           CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
-          CLOUDINARY_FOLDER=immobile
           OTP_MODE=disabled
-          ENABLE_MONETIZATION=false
           EOF
-          echo "=== .env et assets ==="
-          ls -la assets/ || echo "Pas d'assets"
-          ls -la main.py pyproject.toml .env
+          ls -la
 
-      - name: Build APK avec --project immobile
+      - name: Build APK - Flet 0.28.3
         run: |
-          flet --version
-          echo "Building avec --project immobile pour forcer le nom"
-          flet build apk --project immobile --product "IMMOBILE" --verbose 2>&1 | tee build.log
-          echo "=== FIN BUILD ==="
-          echo "=== Recherche APK ==="
+          flet build apk --project immobile --verbose 2>&1 | tee build.log
+          echo "=== APK SEARCH ==="
           find . -name "*.apk" -type f -exec ls -lh {} \;
-          ls -Rlh build/ 2>/dev/null | tail -20
-          echo "=== Fin log ==="
-          tail -50 build.log
+          tail -80 build.log
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -103,4 +71,3 @@ jobs:
             **/*.apk
             build.log
           if-no-files-found: error
-          retention-days: 7
