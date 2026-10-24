@@ -1,52 +1,32 @@
 name: créer-apk
 on:
   push:
-    branches: [ main, principal ]
+    branches: [ main ]
   workflow_dispatch:
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install Linux deps for Flet
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libmpv-dev libwebkit2gtk-4.1-dev || true
-
-      - name: Setup Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Setup Flutter 3.24.5
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.5'
           channel: 'stable'
-          cache: true
-
-      - name: Accept Android licenses
+      - name: Install deps
         run: |
+          sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev || true
           yes | flutter doctor --android-licenses || true
-          flutter doctor -v || true
-
-      - name: Install Python deps
-        run: |
-          pip install --upgrade pip
-          pip install flet==0.27.1 pyinstaller==6.10.0
-          pip install supabase==2.9.1 python-dotenv==1.0.1 cloudinary Pillow httpx requests python-dateutil
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          ls -la services/ views/ || echo "services/views manquants!"
-
-      - name: Create .env
+          pip install flet==0.27.1 pyinstaller==6.10.0 supabase python-dotenv cloudinary Pillow httpx requests
+      - name: Create env
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -61,20 +41,25 @@ jobs:
           CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME
           CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
           CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
-          CLOUDINARY_FOLDER=immobile
           OTP_MODE=disabled
           EOF
-
+          cat > pyproject.toml <<'PYEOF'
+          [project]
+          name = "immobile"
+          version = "1.0.1"
+          dependencies = ["flet==0.27.1","supabase==2.9.1","python-dotenv==1.0.1","cloudinary","Pillow"]
+          [tool.flet]
+          org = "com.immobile.cameroun"
+          project = "IMMOBILE"
+          main = "main.py"
+          PYEOF
       - name: Build APK
-        run: |
-          flet build apk --project . --verbose
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+        run: flet build apk --verbose --project . 2>&1 | tee build.log
+      - uses: actions/upload-artifact@v4
         with:
           name: immobile-apk
           path: |
             build/**/*.apk
             **/*.apk
-          if-no-files-found: error
-          retention-days: 7
+            build.log
+          if-no-files-found: warn
