@@ -15,6 +15,11 @@ from __future__ import annotations
 from typing import Optional
 
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 
 from services.config import DEFAULT_LANGUAGE, LANGUAGES
 

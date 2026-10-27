@@ -1,7 +1,12 @@
-"""Ecrans d'inscription - SANS VERIFICATION (comme demandé)."""
+"""Ecrans d'inscription - SANS VERIFICATION (version de depart)."""
 
 from __future__ import annotations
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 from components.widgets import CountryCitySelector, primary_button, snack, text_field
 from services.auth import Session
 from services.auth_service import save_session
@@ -18,7 +23,7 @@ def _logo():
         spacing=6,
         controls=[
             ft.Container(width=76, height=76, bgcolor=COLORS["primary"], border_radius=22, alignment=ft.alignment.center,
-                content=ft.Icon(ft.Icons.HOME_WORK_ROUNDED, size=40, color="#FFFFFF")),
+                content=ft.Icon(FT_ICONS.HOME_WORK_ROUNDED, size=40, color="#FFFFFF")),
             ft.Text(APP_CONFIG["APP_NAME"], size=28, weight=ft.FontWeight.BOLD, color=COLORS["primary"], text_align=ft.TextAlign.CENTER),
             ft.Text(t("app_tagline"), size=13, color=COLORS["muted"], text_align=ft.TextAlign.CENTER),
         ],
@@ -34,7 +39,7 @@ def _auth_container(page: ft.Page, controls: list) -> ft.Control:
     )
 
 def login_view(page: ft.Page) -> ft.View:
-    phone = text_field(t("phone_label"), prefix_icon=ft.Icons.PHONE)
+    phone = text_field(t("phone_label"), prefix_icon=FT_ICONS.PHONE)
     phone.value = get_dial(DEFAULT_COUNTRY_CODE)
     password = text_field(t("password_label"), password=True, can_reveal_password=True)
 
@@ -50,16 +55,16 @@ def login_view(page: ft.Page) -> ft.View:
         phone, password,
         ft.Row(alignment=ft.MainAxisAlignment.END, controls=[ft.TextButton("Mot de passe oublié ?", on_click=lambda e: page.go("/forgot-password"))]),
         ft.Container(height=8),
-        primary_button(t("login_button"), do_login, ft.Icons.LOGIN, expand=True),
+        primary_button(t("login_button"), do_login, FT_ICONS.LOGIN, expand=True),
         ft.TextButton(t("no_account"), on_click=lambda e: page.go("/register")),
         ft.Row(alignment=ft.MainAxisAlignment.CENTER, controls=[ft.TextButton(code.upper(), on_click=lambda e, c=code: page.go(f"/lang/{c}")) for code in LANGUAGES]),
     ])
     return ft.View(route="/login", bgcolor=COLORS["bg"], scroll=ft.ScrollMode.AUTO, controls=[content])
 
 def register_view(page: ft.Page) -> ft.View:
-    username = text_field(t("name_label"), prefix_icon=ft.Icons.PERSON)
-    email = text_field(t("email_label"), prefix_icon=ft.Icons.EMAIL, keyboard_type=ft.KeyboardType.EMAIL)
-    phone = text_field(t("phone_label"), prefix_icon=ft.Icons.PHONE)
+    username = text_field(t("name_label"), prefix_icon=FT_ICONS.PERSON)
+    email = text_field(t("email_label"), prefix_icon=FT_ICONS.EMAIL, keyboard_type=ft.KeyboardType.EMAIL)
+    phone = text_field(t("phone_label"), prefix_icon=FT_ICONS.PHONE)
     phone.value = get_dial(DEFAULT_COUNTRY_CODE)
     dial_state = {"dial": phone.value}
     locality = text_field(t("zone_label"))
@@ -109,7 +114,7 @@ def register_view(page: ft.Page) -> ft.View:
 
     content = _auth_container(page, [
         ft.Container(height=20), _logo(), ft.Container(height=20), form, ft.Container(height=14),
-        primary_button(t("continue_button"), go_to_cgu, ft.Icons.ARROW_FORWARD, expand=True),
+        primary_button(t("continue_button"), go_to_cgu, FT_ICONS.ARROW_FORWARD, expand=True),
         ft.TextButton(t("has_account"), on_click=lambda e: page.go("/login")),
     ])
     return ft.View(route="/register", bgcolor=COLORS["bg"], scroll=ft.ScrollMode.AUTO, controls=[content])

@@ -1,8 +1,13 @@
-"""Liste des pays supportés - version sans emoji, vrais drapeaux."""
+"""Liste des pays supportés par l'apllication IMMOBILE."""
 
 from __future__ import annotations
 from typing import Dict, List, Optional
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 
 FLAG_BASE_URL = "https://flagcdn.com/w40/{code}.png"
 FLAG_BASE_URL_HD = "https://flagcdn.com/w80/{code}.png"

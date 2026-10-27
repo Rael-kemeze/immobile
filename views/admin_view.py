@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 from components.widgets import avatar, badge, password_card, snack, stat_card, text_field
 from services.auth import Session
 from services.config import COLORS, ROLE_SUPER_ADMIN
@@ -20,18 +25,18 @@ def admin_view(page: ft.Page) -> ft.View:
     stats_box = ft.Column(spacing=10)
     countries_box = ft.Column(spacing=6)
     users_box = ft.Column(spacing=8)
-    search = text_field(t("admin_search_users"), prefix_icon=ft.Icons.SEARCH)
+    search = text_field(t("admin_search_users"), prefix_icon=FT_ICONS.SEARCH)
 
     def build_stats():
         s = db.stats()
         stats_box.controls = [
             ft.Row(spacing=10, controls=[
-                stat_card(ft.Icons.GROUP, t("admin_stat_users"), s["users"], COLORS["primary"]),
-                stat_card(ft.Icons.BLOCK, t("admin_stat_blocked"), s["blocked"], COLORS["danger"]),
+                stat_card(FT_ICONS.GROUP, t("admin_stat_users"), s["users"], COLORS["primary"]),
+                stat_card(FT_ICONS.BLOCK, t("admin_stat_blocked"), s["blocked"], COLORS["danger"]),
             ]),
             ft.Row(spacing=10, controls=[
-                stat_card(ft.Icons.HOME_WORK_OUTLINED, t("admin_stat_listings"), s["biens_active"], COLORS["accent"]),
-                stat_card(ft.Icons.ADMIN_PANEL_SETTINGS_OUTLINED, t("admin_stat_admins"), s["admins"], COLORS["primary_dark"]),
+                stat_card(FT_ICONS.HOME_WORK_OUTLINED, t("admin_stat_listings"), s["biens_active"], COLORS["accent"]),
+                stat_card(FT_ICONS.ADMIN_PANEL_SETTINGS_OUTLINED, t("admin_stat_admins"), s["admins"], COLORS["primary_dark"]),
             ]),
         ]
         rows = []
@@ -105,7 +110,7 @@ def admin_view(page: ft.Page) -> ft.View:
         warning = [
             ft.Container(bgcolor="#FFF4E5", border=ft.border.all(1, COLORS["accent"]), border_radius=12, padding=12,
                 content=ft.Row(spacing=10, controls=[
-                    ft.Icon(ft.Icons.WARNING_AMBER_ROUNDED, color=COLORS["accent"]),
+                    ft.Icon(FT_ICONS.WARNING_AMBER_ROUNDED, color=COLORS["accent"]),
                     ft.Text(t("admin_default_password_warning"), size=13, expand=True),
                 ]),
             ),
@@ -124,8 +129,8 @@ def admin_view(page: ft.Page) -> ft.View:
         appbar=ft.AppBar(
             title=ft.Text(t("admin_space"), color="#FFFFFF", weight=ft.FontWeight.BOLD),
             bgcolor=COLORS["primary"],
-            leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/home")),
-            actions=[ft.IconButton(ft.Icons.REFRESH, icon_color="#FFFFFF", on_click=refresh)],
+            leading=ft.IconButton(FT_ICONS.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/home")),
+            actions=[ft.IconButton(FT_ICONS.REFRESH, icon_color="#FFFFFF", on_click=refresh)],
         ),
         controls=[
             *warning,
@@ -137,7 +142,7 @@ def admin_view(page: ft.Page) -> ft.View:
                 bgcolor="#E8F5E9", border_radius=14, padding=12, border=ft.border.all(1, COLORS["primary"]),
                 content=ft.Column(spacing=8, controls=[
                     ft.Row(spacing=10, controls=[
-                        ft.Icon(ft.Icons.STORAGE, color=COLORS["primary"], size=28),
+                        ft.Icon(FT_ICONS.STORAGE, color=COLORS["primary"], size=28),
                         ft.Column(expand=True, spacing=2, controls=[
                             ft.Text("Gestion Base de Données & Stockage", weight=ft.FontWeight.BOLD, size=15),
                             ft.Text("Vérifie espace utilisé, nettoie photos orphelines, vieilles notifications", size=11, color=COLORS["muted"]),
@@ -145,7 +150,7 @@ def admin_view(page: ft.Page) -> ft.View:
                     ]),
                     ft.ElevatedButton(
                         "Ouvrir Gestion Stockage",
-                        icon=ft.Icons.CLEANING_SERVICES,
+                        icon=FT_ICONS.CLEANING_SERVICES,
                         on_click=lambda e: page.go("/admin/storage"),
                         style=ft.ButtonStyle(bgcolor=COLORS["primary"], color="#FFFFFF"),
                         expand=True,
@@ -157,7 +162,7 @@ def admin_view(page: ft.Page) -> ft.View:
                 bgcolor="#FFF3CD", border_radius=14, padding=12, border=ft.border.all(1, "#FF9800"),
                 content=ft.Column(spacing=8, controls=[
                     ft.Row(spacing=10, controls=[
-                        ft.Icon(ft.Icons.SYSTEM_UPDATE, color="#FF9800", size=28),
+                        ft.Icon(FT_ICONS.SYSTEM_UPDATE, color="#FF9800", size=28),
                         ft.Column(expand=True, spacing=2, controls=[
                             ft.Text("Contrôle à Distance APK & Paiement", weight=ft.FontWeight.BOLD, size=15),
                             ft.Text("Active/désactive paiement, force mises à jour APK SANS republier", size=11, color=COLORS["muted"]),
@@ -165,7 +170,7 @@ def admin_view(page: ft.Page) -> ft.View:
                     ]),
                     ft.ElevatedButton(
                         "Ouvrir Contrôle à Distance",
-                        icon=ft.Icons.SETTINGS_REMOTE,
+                        icon=FT_ICONS.SETTINGS_REMOTE,
                         on_click=lambda e: page.go("/admin/remote"),
                         style=ft.ButtonStyle(bgcolor="#FF9800", color="#FFFFFF"),
                         expand=True,

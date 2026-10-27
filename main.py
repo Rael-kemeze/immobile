@@ -1,6 +1,6 @@
 """IMMOBILE - Application immobiliere internationale.
 
-Flet 0.27+ / Python 3.11
+Flet 0.28+ / Python 3.11
 Lancement :  python main.py
 """
 
@@ -10,6 +10,11 @@ import os
 from urllib.parse import parse_qs
 
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 
 from services.auth import Session
 from services.auth_service import get_session, restore_session
@@ -43,7 +48,7 @@ def maintenance_view(page: ft.Page) -> ft.View:
         vertical_alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
-            ft.Icon(ft.Icons.BUILD_CIRCLE, size=80, color=COLORS["accent"]),
+            ft.Icon(FT_ICONS.BUILD_CIRCLE, size=80, color=COLORS["accent"]),
             ft.Text(
                 "Maintenance en cours",
                 size=24,

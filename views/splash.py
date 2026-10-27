@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 import threading
 import time
 from services.config import APP_CONFIG, COLORS
@@ -62,7 +67,7 @@ def splash_view(page: ft.Page) -> ft.View:
                 modal=True,
                 title=ft.Text("Mise à jour obligatoire"),
                 content=ft.Column(tight=True, spacing=10, controls=[
-                    ft.Icon(ft.Icons.SYSTEM_UPDATE, size=48, color=COLORS["primary"]),
+                    ft.Icon(FT_ICONS.SYSTEM_UPDATE, size=48, color=COLORS["primary"]),
                     ft.Text(f"Version {cfg.get('latest_version')} requise (tu as {APP_CONFIG.get('APP_VERSION','1.0.0')})", weight=ft.FontWeight.BOLD),
                     ft.Text(cfg.get("force_update_message") or cfg.get("changelog") or "Cette mise à jour est obligatoire pour continuer.", size=12),
                 ]),
@@ -83,7 +88,7 @@ def splash_view(page: ft.Page) -> ft.View:
         spacing=12,
         controls=[
             ft.Container(width=90, height=90, bgcolor=COLORS["primary"], border_radius=24, alignment=ft.alignment.center,
-                content=ft.Icon(ft.Icons.HOME_WORK_ROUNDED, size=48, color="white")),
+                content=ft.Icon(FT_ICONS.HOME_WORK_ROUNDED, size=48, color="white")),
             ft.Text(APP_CONFIG["APP_NAME"], size=32, weight=ft.FontWeight.BOLD, color=COLORS["primary"]),
             ft.Text("Immobilier pour tous - Cameroun", size=14, color=COLORS["muted"]),
             ft.Container(height=20),

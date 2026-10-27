@@ -1,6 +1,11 @@
 """Admin - Gestion base de données et stockage."""
 
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 from components.widgets import primary_button, snack
 from services.config import COLORS
 from services.db import db
@@ -159,16 +164,16 @@ def maintenance_view(page: ft.Page) -> ft.View:
         ft.Text("Surveille et optimise ton stockage Supabase", size=12, color=COLORS["muted"]),
         progress,
         ft.Container(bgcolor="#FFFFFF", border_radius=12, padding=14, border=ft.border.all(1, "#E0E4E1"), content=stats_text),
-        ft.ElevatedButton("Rafraîchir stats", icon=ft.Icons.REFRESH, on_click=refresh_stats, style=ft.ButtonStyle(bgcolor=COLORS["primary"], color="#FFFFFF")),
+        ft.ElevatedButton("Rafraîchir stats", icon=FT_ICONS.REFRESH, on_click=refresh_stats, style=ft.ButtonStyle(bgcolor=COLORS["primary"], color="#FFFFFF")),
         ft.Divider(),
         ft.Text("Nettoyage", weight=ft.FontWeight.BOLD, size=16),
-        ft.ElevatedButton("Supprimer photos orphelines", icon=ft.Icons.CLEANING_SERVICES, on_click=do_cleanup_orphans, style=ft.ButtonStyle(bgcolor="#FFFFFF", color=COLORS["primary"])),
-        ft.ElevatedButton("Supprimer vieilles notifications + OTP (>30j)", icon=ft.Icons.DELETE_SWEEP, on_click=do_cleanup_old, style=ft.ButtonStyle(bgcolor="#FFFFFF", color=COLORS["primary"])),
-        ft.ElevatedButton("Optimiser tout (recommandé)", icon=ft.Icons.ROCKET_LAUNCH, on_click=do_optimize, style=ft.ButtonStyle(bgcolor=COLORS["accent"], color="#FFFFFF")),
+        ft.ElevatedButton("Supprimer photos orphelines", icon=FT_ICONS.CLEANING_SERVICES, on_click=do_cleanup_orphans, style=ft.ButtonStyle(bgcolor="#FFFFFF", color=COLORS["primary"])),
+        ft.ElevatedButton("Supprimer vieilles notifications + OTP (>30j)", icon=FT_ICONS.DELETE_SWEEP, on_click=do_cleanup_old, style=ft.ButtonStyle(bgcolor="#FFFFFF", color=COLORS["primary"])),
+        ft.ElevatedButton("Optimiser tout (recommandé)", icon=FT_ICONS.ROCKET_LAUNCH, on_click=do_optimize, style=ft.ButtonStyle(bgcolor=COLORS["accent"], color="#FFFFFF")),
         ft.Divider(),
         ft.Text("Annonces inactives", weight=ft.FontWeight.BOLD, size=16),
         ft.Text("Supprime les annonces non approuvées ou désactivées de plus de 90 jours", size=11, color=COLORS["muted"]),
-        ft.OutlinedButton("Voir & Supprimer vieilles annonces inactives", icon=ft.Icons.DELETE_FOREVER, on_click=do_check_old_biens, style=ft.ButtonStyle(color=COLORS["danger"])),
+        ft.OutlinedButton("Voir & Supprimer vieilles annonces inactives", icon=FT_ICONS.DELETE_FOREVER, on_click=do_check_old_biens, style=ft.ButtonStyle(color=COLORS["danger"])),
         ft.Container(height=20),
         ft.Container(bgcolor="#E8F5E9", border_radius=12, padding=12, content=ft.Column(spacing=6, controls=[
             ft.Text("Tu es sur Cloudinary 25 Go", weight=ft.FontWeight.BOLD, size=13, color=COLORS["primary"]),
@@ -186,6 +191,6 @@ def maintenance_view(page: ft.Page) -> ft.View:
         bgcolor=COLORS["bg"],
         padding=14,
         scroll=ft.ScrollMode.AUTO,
-        appbar=ft.AppBar(title=ft.Text("Gestion Stockage", color="#FFFFFF"), bgcolor=COLORS["primary"], leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/admin"))),
+        appbar=ft.AppBar(title=ft.Text("Gestion Stockage", color="#FFFFFF"), bgcolor=COLORS["primary"], leading=ft.IconButton(FT_ICONS.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/admin"))),
         controls=[content],
     )

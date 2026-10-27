@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 from components.widgets import app_bar, primary_button, snack
 from services.auth import Session
 from services.config import COLORS
@@ -115,7 +120,7 @@ def premium_view(page: ft.Page) -> ft.View:
         is_popular = plan_id == "PRO"
         
         features = [ft.Row(spacing=6, controls=[
-            ft.Icon(ft.Icons.CHECK_CIRCLE, size=16, color=COLORS["primary"]),
+            ft.Icon(FT_ICONS.CHECK_CIRCLE, size=16, color=COLORS["primary"]),
             ft.Text(f, size=12, color=COLORS["text"], expand=True)
         ]) for f in plan["features"]]
         
@@ -133,7 +138,7 @@ def premium_view(page: ft.Page) -> ft.View:
                         padding=ft.padding.symmetric(6,10),
                         border_radius=20,
                         content=ft.Row(spacing=4, controls=[
-                            ft.Icon(getattr(ft.Icons, plan["icon"], ft.Icons.STAR), size=16, color=plan["color"]),
+                            ft.Icon(getattr(ft.Icons, plan["icon"], FT_ICONS.STAR), size=16, color=plan["color"]),
                             ft.Text(plan["name"], size=12, weight=ft.FontWeight.BOLD, color=plan["color"]),
                         ])
                     ),
@@ -174,12 +179,12 @@ def premium_view(page: ft.Page) -> ft.View:
         content=ft.Column(spacing=8, controls=[
             ft.Row(spacing=10, controls=[
                 ft.Container(width=48, height=48, bgcolor=f"{current_plan['color']}15", border_radius=12, alignment=ft.alignment.center,
-                    content=ft.Icon(getattr(ft.Icons, current_plan["icon"], ft.Icons.STAR), color=current_plan["color"], size=24)),
+                    content=ft.Icon(getattr(ft.Icons, current_plan["icon"], FT_ICONS.STAR), color=current_plan["color"], size=24)),
                 ft.Column(spacing=2, expand=True, controls=[
                     ft.Text(f"Plan {current_plan['name']}", weight=ft.FontWeight.BOLD, size=16),
                     ft.Text(f"{credits} crédit(s) Boost • {total_biens} annonces", size=12, color=COLORS["muted"]),
                 ]),
-                ft.IconButton(ft.Icons.REFRESH, icon_color=COLORS["primary"], on_click=lambda e: page.go("/premium")),
+                ft.IconButton(FT_ICONS.REFRESH, icon_color=COLORS["primary"], on_click=lambda e: page.go("/premium")),
             ]),
             ft.Container(
                 visible=current_plan["id"]=="FREE",
@@ -227,7 +232,7 @@ def premium_view(page: ft.Page) -> ft.View:
         border=ft.border.all(1, "#90CAF9"),
         content=ft.Column(spacing=4, controls=[
             ft.Row(spacing=6, controls=[
-                ft.Icon(ft.Icons.INFO_OUTLINED, size=18, color="#1565C0"),
+                ft.Icon(FT_ICONS.INFO_OUTLINED, size=18, color="#1565C0"),
                 ft.Text("Mode Lancement Gratuit Activé", weight=ft.FontWeight.BOLD, size=13, color="#0D47A1"),
             ]),
             ft.Text("Tout est gratuit pour l'instant pour attirer les premiers utilisateurs. Passe ENABLE_MONETIZATION = True quand tu veux activer le paiement.", size=11, color="#1565C0"),

@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 from components.widgets import avatar, badge, password_card, snack, text_field
 from services.auth import Session
 from services.auth_service import clear_session
@@ -28,7 +33,7 @@ def _tile(icon: str, text: str, on_click, color: str = None, subtitle: str = Non
         leading=ft.Icon(icon, color=color or COLORS["primary"]),
         title=ft.Text(text, color=color or COLORS["text"]),
         subtitle=ft.Text(subtitle, size=12) if subtitle else None,
-        trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT, color=COLORS["muted"]),
+        trailing=ft.Icon(FT_ICONS.CHEVRON_RIGHT, color=COLORS["muted"]),
         on_click=on_click,
     )
 
@@ -108,21 +113,21 @@ def settings_view(page: ft.Page) -> ft.View:
         page.go("/login")
 
     account_tiles = [
-        _tile(ft.Icons.PERSON_OUTLINE, t("edit_profile"), lambda e: page.go("/profile")),
-        _tile(ft.Icons.NOTIFICATIONS_ACTIVE_OUTLINED, t("my_alerts"), lambda e: page.go("/alerts"), subtitle="Configuration des alertes par zone"),
+        _tile(FT_ICONS.PERSON_OUTLINE, t("edit_profile"), lambda e: page.go("/profile")),
+        _tile(FT_ICONS.NOTIFICATIONS_ACTIVE_OUTLINED, t("my_alerts"), lambda e: page.go("/alerts"), subtitle="Configuration des alertes par zone"),
     ]
     if is_admin:
-        account_tiles.insert(0, _tile(ft.Icons.ADMIN_PANEL_SETTINGS_OUTLINED, t("admin_space"), lambda e: page.go("/admin"), color=COLORS["accent"]))
+        account_tiles.insert(0, _tile(FT_ICONS.ADMIN_PANEL_SETTINGS_OUTLINED, t("admin_space"), lambda e: page.go("/admin"), color=COLORS["accent"]))
 
     info_tiles = [
-        _tile(ft.Icons.DESCRIPTION_OUTLINED, t("terms_link"), show_terms),
-        _tile(ft.Icons.INFO_OUTLINE, t("about_title"), show_about, subtitle=f"{t('version_label')} {APP_CONFIG['APP_VERSION']}"),
-        _tile(ft.Icons.LOGOUT, t("logout_button"), logout),
+        _tile(FT_ICONS.DESCRIPTION_OUTLINED, t("terms_link"), show_terms),
+        _tile(FT_ICONS.INFO_OUTLINE, t("about_title"), show_about, subtitle=f"{t('version_label')} {APP_CONFIG['APP_VERSION']}"),
+        _tile(FT_ICONS.LOGOUT, t("logout_button"), logout),
     ]
 
     danger = []
     if not is_admin:
-        danger = [_card(t("danger_zone"), [_tile(ft.Icons.DELETE_FOREVER_OUTLINED, t("delete_account"), ask_delete_account, color=COLORS["danger"])])]
+        danger = [_card(t("danger_zone"), [_tile(FT_ICONS.DELETE_FOREVER_OUTLINED, t("delete_account"), ask_delete_account, color=COLORS["danger"])])]
 
     def gap():
         return ft.Container(height=12)
@@ -132,7 +137,7 @@ def settings_view(page: ft.Page) -> ft.View:
         bgcolor=COLORS["bg"],
         padding=16,
         scroll=ft.ScrollMode.AUTO,
-        appbar=ft.AppBar(title=ft.Text(t("settings_title"), color="#FFFFFF"), bgcolor=COLORS["primary"], leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/profile"))),
+        appbar=ft.AppBar(title=ft.Text(t("settings_title"), color="#FFFFFF"), bgcolor=COLORS["primary"], leading=ft.IconButton(FT_ICONS.ARROW_BACK, icon_color="#FFFFFF", on_click=lambda e: page.go("/profile"))),
         controls=[
             header, gap(),
             _card(t("settings_account"), account_tiles), gap(),

@@ -1,8 +1,13 @@
-"""Conditions generales d'utilisation - a valider avant finalisation du compte."""
+"""Conditions generales d'utilisation - a valider avant finalisation du compte et redirection sur la page d'accueil."""
 
 from __future__ import annotations
 
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 
 from components.widgets import primary_button, snack
 from services.config import COLORS
@@ -29,7 +34,7 @@ def cgu_view(page: ft.Page, on_accept) -> ft.View:
             title=ft.Text(t("cgu_title"), color="#FFFFFF"),
             bgcolor=COLORS["primary"],
             leading=ft.IconButton(
-                ft.Icons.ARROW_BACK,
+                FT_ICONS.ARROW_BACK,
                 icon_color="#FFFFFF",
                 on_click=lambda e: page.go("/register"),
             ),
@@ -45,7 +50,7 @@ def cgu_view(page: ft.Page, on_accept) -> ft.View:
             accept_box,
             ft.Container(height=8),
             primary_button(
-                t("create_account_button"), confirm, ft.Icons.CHECK_CIRCLE, expand=True
+                t("create_account_button"), confirm, FT_ICONS.CHECK_CIRCLE, expand=True
             ),
         ],
     )

@@ -1,9 +1,8 @@
 -- ============================================================
 -- IMMOBILE : schema Supabase FINAL avec OTP + cuisine/salons
--- À coller dans Supabase > SQL Editor > Run
 -- ============================================================
 
--- 1. USERS (ton code + unique phone déjà ok)
+-- 1. USERS (code + unique phone déjà ok)
 create table if not exists users (
   id uuid primary key default gen_random_uuid(),
   username text not null,
@@ -39,7 +38,7 @@ create table if not exists biens (
   chambres integer,
   salles_de_bain integer,
   salons integer default 0,
-  -- Cuisine (nouveau design)
+  -- Cuisine
   cuisines integer default 0,
   nb_cuisines integer default 0,
   cuisine_interne boolean default false,

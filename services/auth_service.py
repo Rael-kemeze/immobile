@@ -4,6 +4,11 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, Optional
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+
 from services.auth import Session
 from services.db import db
 
