@@ -1,4 +1,4 @@
-name: Build APK <100Mo
+name: Build APK
 
 on:
   push:
@@ -34,43 +34,28 @@ jobs:
           CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
           EOF
 
-      - name: Build APK 1 - create android folder
-        run: flet build apk --org com.immobile.cameroun --project immobile
+      - name: Build APK
+        run: flet build apk --org com.immobile.cameroun --project immobile --verbose
 
-      - name: Enable shrink to go under 100Mo
+      - name: List and keep only arm64
         run: |
-          GRADLE_FILE=$(find build -name "build.gradle" | grep "app/build.gradle" | head -1)
-          echo "Gradle: $GRADLE_FILE"
-          if [ -f "$GRADLE_FILE" ]; then
-            sed -i 's/minifyEnabled false/minifyEnabled true/g' $GRADLE_FILE || true
-            sed -i 's/shrinkResources false/shrinkResources true/g' $GRADLE_FILE || true
-            if ! grep -q "minifyEnabled true" $GRADLE_FILE; then
-              sed -i '/release {/a \            minifyEnabled true\n            shrinkResources true' $GRADLE_FILE
-            fi
-            echo "--- R8 activé ---"
-            grep -A3 "release {" $GRADLE_FILE | head -10
-          fi
-          mkdir -p build/app/src/main 2>/dev/null || true
-          touch build/app/proguard-rules.pro 2>/dev/null || true
-
-      - name: Build APK 2 - optimized <100Mo
-        run: |
-          flet build apk --org com.immobile.cameroun --project immobile --verbose
-          find build -name "*.apk" -type f -exec ls -lh {} \;
-          # Garde seulement arm64
-          find build -name "*.apk" ! -name "*arm64*" -delete 2>/dev/null || true
-          echo "=== FINAL ==="
-          find build -name "*.apk" -type f -exec ls -lh {} \;
-          APK=$(find build -name "*arm64*.apk" | head -1)
-          if [ -n "$APK" ]; then
-            SIZE=$(stat -c%s "$APK")
-            echo "Taille: $(echo "scale=1; $SIZE/1024/1024" | bc) Mo"
+          echo "=== Tous les APKs ==="
+          find build -type f -name "*.apk" -exec ls -lh {} \;
+          # Supprime tout sauf arm64
+          find build -type f -name "*.apk" ! -name "*arm64*" -delete 2>/dev/null || true
+          echo "=== Après filtre arm64 ==="
+          find build -type f -name "*.apk" -exec ls -lh {} \;
+          # Si pas de arm64 dans le nom (parfois c'est juste app-release.apk), garde le plus gros
+          if [ -z "$(find build -name "*.apk")" ]; then
+            echo "Pas d'arm64 trouvé, on garde tout"
+            flet build apk --org com.immobile.cameroun --project immobile || true
+            find build -type f -name "*.apk" -exec ls -lh {} \;
           fi
 
-      - name: Upload APK <100Mo
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: immobile-APK-arm64
-          path: build/**/*arm64*.apk
+          name: immobile-APK
+          path: build/**/*.apk
           if-no-files-found: error
           retention-days: 3
