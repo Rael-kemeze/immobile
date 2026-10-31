@@ -1,104 +1,104 @@
-"""Splash avec vérification mise à jour automatique."""
+"""Splash avec vérification mise à jour - Pour site officiel."""
 
 from __future__ import annotations
 import flet as ft
-try:
-    FT_ICONS = ft.Icons
-except:
-    FT_ICONS = ft.icons
-
-import threading
-import time
 from services.config import APP_CONFIG, COLORS
 from services.auth_service import get_session, restore_session
-from services.i18n import t
+from services.db import db
+from components.widgets import snack
 
 def splash_view(page: ft.Page) -> ft.View:
-    
     # Vérifie mise à jour en arrière-plan
-    def check_update_async():
-        time.sleep(1.5)
+    def check_update():
         try:
-            from services.remote_config import get_remote_config
-            cfg = get_remote_config(force_refresh=True)
-            current_code = int(APP_CONFIG.get("APP_VERSION_CODE", 100))
-            latest_code = cfg.get("version_code", 100)
-            min_code = cfg.get("min_required_code", 100)
-            
-            print(f"[Update] Check: current={current_code} latest={latest_code} min={min_code} monetization={cfg.get('enable_monetization')}")
-            
-            # Si mise à jour forcée
-            if min_code > current_code:
-                show_forced_dialog(cfg)
-            elif latest_code > current_code:
-                show_update_snack(cfg)
-                
+            from services.update_service import update_service, APP_VERSION
+            info = update_service.check_for_update()
+            if info["has_update"]:
+                print(f"[Update] Nouvelle version {info['latest_version']} disponible (actuelle {APP_VERSION})")
+                # Affiche bannière si pas forcée, ou dialogue si forcée
+                if info["is_forced"]:
+                    show_forced_update(page, info)
+                else:
+                    show_update_banner(page, info)
         except Exception as e:
-            print(f"[Update] Error: {e}")
+            print(f"[Update] Check error: {e}")
     
-    def show_update_snack(cfg):
+    def show_update_banner(page: ft.Page, info: dict):
+        def reload_app(e):
+            page.go("/splash")
+            page.update()
+            # Pour web: recharge la page
+            try:
+                page.launch_url("/")  # ou location.reload via JS
+            except:
+                pass
+            page.go("/home")
+        
+        banner = ft.Container(
+            bgcolor="#FFF3CD", border_radius=10, padding=12,
+            border=ft.border.all(1, "#FFC107"),
+            content=ft.Column(spacing=6, controls=[
+                ft.Row(spacing=8, controls=[
+                    ft.Icon(ft.icons.SYSTEM_UPDATE, color="#856404"),
+                    ft.Text(f"Nouvelle version {info['latest_version']} disponible !", weight=ft.FontWeight.BOLD, color="#856404", size=13),
+                ]),
+                ft.Text(info.get("changelog","Améliorations et corrections"), size=11, color="#856404"),
+                ft.Row(spacing=8, controls=[
+                    ft.ElevatedButton("Mettre à jour", icon=ft.icons.REFRESH, on_click=reload_app, bgcolor="#FFC107", color="#000"),
+                    ft.TextButton("Plus tard", on_click=lambda e: setattr(banner, 'visible', False) or page.update()),
+                ])
+            ])
+        )
+        # Ajoute en haut de la page si possible
         try:
-            def reload_action(e):
-                page.go("/splash")
-                page.update()
-                time.sleep(0.5)
-                page.go("/home")
-            
-            page.snack_bar = ft.SnackBar(
-                content=ft.Text(f"🚀 Nouvelle version {cfg.get('latest_version')} disponible ! {cfg.get('update_message','')}"),
-                action="Recharger",
-                on_action=reload_action,
-                duration=8000
-            )
+            page.snack_bar = ft.SnackBar(content=ft.Text(f"Version {info['latest_version']} disponible - Rechargez la page"), action="Recharger", on_action=reload_app)
             page.snack_bar.open = True
             page.update()
-        except Exception as ex:
-            print(f"[Update] Snack error: {ex}")
+        except:
+            pass
     
-    def show_forced_dialog(cfg):
-        try:
-            def update_now(e):
-                url = cfg.get("apk_url") or cfg.get("download_url") or "https://immobile.cm"
+    def show_forced_update(page: ft.Page, info: dict):
+        def update_now(e):
+            url = info.get("download_url") or "/"
+            try:
                 page.launch_url(url)
-                page.dialog.open = False
-                page.update()
-            
-            dialog = ft.AlertDialog(
-                modal=True,
-                title=ft.Text("Mise à jour obligatoire"),
-                content=ft.Column(tight=True, spacing=10, controls=[
-                    ft.Icon(FT_ICONS.SYSTEM_UPDATE, size=48, color=COLORS["primary"]),
-                    ft.Text(f"Version {cfg.get('latest_version')} requise (tu as {APP_CONFIG.get('APP_VERSION','1.0.0')})", weight=ft.FontWeight.BOLD),
-                    ft.Text(cfg.get("force_update_message") or cfg.get("changelog") or "Cette mise à jour est obligatoire pour continuer.", size=12),
-                ]),
-                actions=[ft.ElevatedButton("Mettre à jour", on_click=update_now, bgcolor=COLORS["primary"], color="white")]
-            )
-            page.dialog = dialog
-            dialog.open = True
-            page.update()
-        except Exception as ex:
-            print(f"[Forced] Dialog error: {ex}")
+            except:
+                page.go("/")
+        
+        dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Mise à jour obligatoire"),
+            content=ft.Column(spacing=10, tight=True, controls=[
+                ft.Text(f"Version {info['latest_version']} requise (tu as {info['current_version']})"),
+                ft.Text(info.get("message") or info.get("changelog") or "Cette mise à jour corrige des bugs importants.", size=12),
+            ]),
+            actions=[ft.ElevatedButton("Mettre à jour maintenant", on_click=update_now, bgcolor=COLORS["primary"], color="white")]
+        )
+        page.dialog = dialog
+        dialog.open = True
+        page.update()
 
-    # Lancer check en background
-    threading.Thread(target=check_update_async, daemon=True).start()
+    # Lance vérif après 2 sec
+    import threading
+    threading.Timer(2.0, check_update).start()
 
-    # UI Splash
+    # Splash normal
     logo = ft.Column(
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         spacing=12,
         controls=[
             ft.Container(width=90, height=90, bgcolor=COLORS["primary"], border_radius=24, alignment=ft.alignment.center,
-                content=ft.Icon(FT_ICONS.HOME_WORK_ROUNDED, size=48, color="white")),
+                content=ft.Icon(ft.icons.HOME_WORK_ROUNDED, size=48, color="white")),
             ft.Text(APP_CONFIG["APP_NAME"], size=32, weight=ft.FontWeight.BOLD, color=COLORS["primary"]),
-            ft.Text("Immobilier pour tous - Cameroun", size=14, color=COLORS["muted"]),
+            ft.Text("Immobilier pour tous", size=14, color=COLORS["muted"]),
             ft.Container(height=20),
             ft.ProgressRing(width=32, height=32, color=COLORS["primary"]),
-            ft.Text(f"v{APP_CONFIG.get('APP_VERSION','1.0.0')} - Bafoussam", size=11, color=COLORS["muted"]),
+            ft.Text(f"v{APP_CONFIG.get('APP_VERSION','1.0.0')}", size=11, color=COLORS["muted"]),
         ]
     )
 
-    def go_next():
-        time.sleep(1.2)
+    def go_next(e=None):
+        # Restore session
         try:
             if get_session(page) and restore_session(page):
                 page.go("/home")
@@ -107,7 +107,13 @@ def splash_view(page: ft.Page) -> ft.View:
         except:
             page.go("/login")
 
-    threading.Thread(target=go_next, daemon=True).start()
+    # Auto-navigate après 1.5s
+    threading.Timer(1.5, lambda: page.go("/home") if False else go_next()).start()
 
-    content = ft.Container(expand=True, alignment=ft.alignment.center, content=logo)
+    content = ft.Container(
+        expand=True,
+        alignment=ft.alignment.center,
+        content=logo
+    )
+
     return ft.View(route="/splash", bgcolor=COLORS["bg"], controls=[content])

@@ -1,4 +1,4 @@
-"""Accueil : recherche, filtres (dont pays), liste des biens - RESPONSIVE FIX PC/TABLETTE."""
+"""Accueil : recherche, filtres (dont pays), liste des biens - RESPONSIVE FIX PC/TABLETTE + MENU."""
 
 from __future__ import annotations
 import flet as ft
@@ -7,7 +7,7 @@ try:
 except:
     FT_ICONS = ft.icons
 
-from components.widgets import app_bar, bien_card, responsive_wrapper
+from components.widgets import app_bar, bien_card, responsive_wrapper, avatar
 from components.widgets import text_field
 from services.auth import Session
 from services.config import APP_CONFIG, CATEGORIES, COLORS, TRANSACTIONS
@@ -66,7 +66,6 @@ def home_view(page: ft.Page) -> ft.View:
     def open_bien(bien):
         page.go(f"/bien/{bien['id']}")
 
-    # Conteneur résultats - sera GridView ou ListView selon taille
     results_container = ft.Container(expand=True)
 
     def refresh(e=None):
@@ -84,7 +83,6 @@ def home_view(page: ft.Page) -> ft.View:
         biens = monetization.sort_biens_by_monetization(raw_biens)
         w = page.window_width or 400
         
-        # Détermine colonnes selon largeur
         if w >= 1400:
             col_count = 4
             max_extent = 360
@@ -111,7 +109,6 @@ def home_view(page: ft.Page) -> ft.View:
                 )
             )
         elif col_count == 1:
-            # Mobile : liste verticale
             results_container.content = ft.ListView(
                 expand=True,
                 spacing=12,
@@ -119,7 +116,6 @@ def home_view(page: ft.Page) -> ft.View:
                 controls=[bien_card(page, b, open_bien, refresh) for b in biens]
             )
         else:
-            # Tablette / PC : grille
             results_container.content = ft.GridView(
                 expand=True,
                 runs_count=col_count,
@@ -222,11 +218,9 @@ def home_view(page: ft.Page) -> ft.View:
         filters_panel.visible = not filters_panel.visible
         page.update()
 
-    # Header filtres - responsive : sur PC, tout sur une ligne
     def build_header():
         w = page.window_width or 400
         if w >= 900:
-            # PC : barre filtres en ligne
             return ft.Column(spacing=10, controls=[
                 ft.Row(spacing=10, controls=[
                     ft.Container(country_dd, width=280),
@@ -238,7 +232,6 @@ def home_view(page: ft.Page) -> ft.View:
                 filters_panel,
             ])
         else:
-            # Mobile : colonne
             return ft.Column(spacing=8, controls=[
                 country_dd,
                 ft.Row([ft.Container(search, expand=True), ft.IconButton(FT_ICONS.TUNE, icon_color=COLORS["primary"], bgcolor="#FFFFFF", on_click=toggle_filters)]),
@@ -253,10 +246,8 @@ def home_view(page: ft.Page) -> ft.View:
         refresh()
 
     page.on_resized = on_resize
-
     refresh()
 
-    # Body principal - Column avec header fixe + résultats expand
     body = ft.Column(expand=True, spacing=0, controls=[
         header_container,
         ft.Container(height=10),
@@ -274,13 +265,64 @@ def home_view(page: ft.Page) -> ft.View:
     else:
         body_wrapped = ft.Container(padding=ft.padding.all(12), content=body, expand=True)
 
+    # ===== MENU DRAWER - SEUL AJOUT =====
+    def handle_drawer(e):
+        idx = e.control.selected_index
+        routes = ["/home", "/favoris", "/mes-annonces", "/publish", "/profile", "/notifications", "/settings", "logout"]
+        r = routes[idx] if idx < len(routes) else "/home"
+        drawer.open = False
+        page.update()
+        if r == "logout":
+            Session.logout()
+            try: page.client_storage.remove("session")
+            except: pass
+            reset_home_state()
+            page.go("/login")
+        else:
+            page.go(r)
+
+    user = Session.user or {}
+    drawer = ft.NavigationDrawer(
+        on_change=handle_drawer,
+        bgcolor="#FFFFFF",
+        controls=[
+            ft.Container(bgcolor=COLORS["primary"], padding=16, content=ft.Row(spacing=12, controls=[avatar(user, 50) if user else ft.Icon(FT_ICONS.PERSON, color="#FFFFFF", size=40), ft.Column(spacing=2, controls=[ft.Text(user.get("username","Invité"), weight=ft.FontWeight.BOLD, color="#FFFFFF", size=16), ft.Text(user.get("phone",""), color="#DDE4DF", size=12)])])),
+            ft.Divider(height=1),
+            ft.NavigationDrawerDestination(icon=FT_ICONS.HOME_OUTLINED, label="Accueil", selected_icon=FT_ICONS.HOME),
+            ft.NavigationDrawerDestination(icon=FT_ICONS.FAVORITE_BORDER, label="Favoris", selected_icon=FT_ICONS.FAVORITE),
+            ft.NavigationDrawerDestination(icon=FT_ICONS.LIST_ALT_OUTLINED, label="Mes annonces", selected_icon=FT_ICONS.LIST_ALT),
+            ft.NavigationDrawerDestination(icon=FT_ICONS.ADD_CIRCLE_OUTLINE, label="Publier une annonce", selected_icon=FT_ICONS.ADD_CIRCLE),
+            ft.NavigationDrawerDestination(icon=FT_ICONS.PERSON_OUTLINE, label="Mon profil", selected_icon=FT_ICONS.PERSON),
+            ft.NavigationDrawerDestination(icon=FT_ICONS.NOTIFICATIONS_OUTLINED, label="Notifications", selected_icon=FT_ICONS.NOTIFICATIONS),
+            ft.NavigationDrawerDestination(icon=FT_ICONS.SETTINGS_OUTLINED, label="Paramètres", selected_icon=FT_ICONS.SETTINGS),
+            ft.Divider(height=1),
+            ft.NavigationDrawerDestination(icon=FT_ICONS.LOGOUT, label="Déconnexion", selected_icon=FT_ICONS.LOGOUT),
+        ],
+    )
+
+    def open_drawer(e):
+        page.open(drawer)
+
+    # AppBar avec bouton menu en haut à gauche - MEME DESIGN mais avec leading
+    custom_appbar = ft.AppBar(
+        leading=ft.IconButton(FT_ICONS.MENU, icon_color="#FFFFFF", on_click=open_drawer, tooltip="Menu"),
+        title=ft.Row(spacing=10, vertical_alignment=ft.CrossAxisAlignment.CENTER, controls=[
+            ft.Container(width=34, height=34, bgcolor="#FFFFFF", border_radius=9, alignment=ft.alignment.center, content=ft.Icon(FT_ICONS.HOME_WORK_ROUNDED, size=20, color=COLORS["primary"])),
+            ft.Text(APP_CONFIG["APP_NAME"], weight=ft.FontWeight.BOLD, color="#FFFFFF", size=19)
+        ]),
+        bgcolor=COLORS["primary"],
+        center_title=False,
+        actions=[
+            ft.IconButton(FT_ICONS.NOTIFICATIONS_OUTLINED, icon_color="#FFFFFF", on_click=lambda e: page.go("/notifications")),
+            ft.IconButton(FT_ICONS.REFRESH, icon_color="#FFFFFF", on_click=refresh),
+        ] + ([ft.IconButton(FT_ICONS.ADMIN_PANEL_SETTINGS_OUTLINED, icon_color="#FFFFFF", tooltip=t("admin_space"), on_click=lambda e: page.go("/admin"))] if Session.is_admin() else []),
+    )
+
     return ft.View(
         route="/home",
         bgcolor=COLORS["bg"],
-        appbar=app_bar(APP_CONFIG["APP_NAME"], page, actions=[
-            ft.IconButton(FT_ICONS.NOTIFICATIONS_OUTLINED, icon_color="#FFFFFF", on_click=lambda e: page.go("/notifications")),
-            ft.IconButton(FT_ICONS.REFRESH, icon_color="#FFFFFF", on_click=refresh),
-        ] + ([ft.IconButton(FT_ICONS.ADMIN_PANEL_SETTINGS_OUTLINED, icon_color="#FFFFFF", tooltip=t("admin_space"), on_click=lambda e: page.go("/admin"))] if Session.is_admin() else [])),
+        appbar=custom_appbar,
+        drawer=drawer,
         controls=[body_wrapped],
         floating_action_button=ft.FloatingActionButton(icon=FT_ICONS.ADD, bgcolor=COLORS["accent"], on_click=lambda e: page.go("/publish")),
         navigation_bar=bottom_bar(page, 0),
