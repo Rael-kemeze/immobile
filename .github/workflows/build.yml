@@ -1,4 +1,4 @@
-name: Build APK
+name: Build APK 110Mo
 
 on:
   push:
@@ -18,12 +18,10 @@ jobs:
           flutter-version: '3.29.2'
           channel: 'stable'
           cache: true
-
       - name: Install Flet
         run: |
           pip install --upgrade pip
           pip install flet==0.28.3
-
       - name: Create .env
         run: |
           cat > .env << EOF
@@ -33,29 +31,32 @@ jobs:
           CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
           EOF
-
       - name: Build APK
         run: flet build apk --org com.immobile.cameroun --project immobile --verbose
-
-      - name: List and keep only arm64
+      - name: DEBUG + DELETE pour passer de 340Mo à 110Mo
         run: |
-          echo "=== Tous les APKs ==="
-          find build -type f -name "*.apk" -exec ls -lh {} \;
-          # Supprime tout sauf arm64
-          find build -type f -name "*.apk" ! -name "*arm64*" -delete 2>/dev/null || true
-          echo "=== Après filtre arm64 ==="
-          find build -type f -name "*.apk" -exec ls -lh {} \;
-          # Si pas de arm64 dans le nom (parfois c'est juste app-release.apk), garde le plus gros
-          if [ -z "$(find build -name "*.apk")" ]; then
-            echo "Pas d'arm64 trouvé, on garde tout"
-            flet build apk --org com.immobile.cameroun --project immobile || true
-            find build -type f -name "*.apk" -exec ls -lh {} \;
-          fi
-
-      - name: Upload APK
+          echo "=== AVANT (devrait être 3 APK = 340Mo) ==="
+          find build -type f -name "*.apk" | xargs ls -lh
+          du -sh build
+          echo ""
+          echo "=== SUPPRESSION armeabi + x86_64 ==="
+          find build -type f -name "*armeabi*" -print -delete
+          find build -type f -name "*x86*" -print -delete
+          find build -type f -name "*x64*" -print -delete
+          # Garde seulement arm64
+          echo ""
+          echo "=== APRES (devrait être 1 APK = 110Mo) ==="
+          find build -type f -name "*.apk" | xargs ls -lh
+          du -sh build
+          echo ""
+          echo "Taille finale:"
+          APK=$(find build -type f -name "*.apk" | head -1)
+          ls -lh $APK
+          echo "Size Mo: $(du -m $APK | cut -f1)"
+      - name: Upload 1 APK ONLY
         uses: actions/upload-artifact@v4
         with:
-          name: immobile-APK
+          name: immobile-110Mo-1APK
           path: build/**/*.apk
           if-no-files-found: error
           retention-days: 3
