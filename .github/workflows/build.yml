@@ -1,77 +1,73 @@
-name: créer-apk
+name: Build APK + AAB
+
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  build-apk:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.2'
           channel: 'stable'
+          cache: true
 
-      - name: Install deps
+      - name: Install Flet
         run: |
-          sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev || true
-          yes | flutter doctor --android-licenses || true
-          pip install flet==0.28.3 supabase python-dotenv cloudinary Pillow httpx
+          pip install --upgrade pip
+          pip install flet==0.28.3
 
-      - name: Fix pyproject
+      - name: Create .env
         run: |
-          python3 << 'PY'
-          open("pyproject.toml","w").write('[project]\nname="immobile"\nversion="1.0.1"\nrequires-python=">=3.9"\ndependencies=["flet==0.28.3","supabase==2.9.1","python-dotenv==1.0.1","cloudinary","Pillow"]\n\n[tool.flet]\norg="com.immobile.cameroun"\nproject="immobile"\nmain="main.py"\nassets_dir="assets"\n')
-          PY
-          cat pyproject.toml
-
-      - name: Create secrets
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-        run: |
-          mkdir -p assets
-          cat > .env <<EOF
-          SUPABASE_URL=$SUPABASE_URL
-          SUPABASE_KEY=$SUPABASE_KEY
-          SUPABASE_BUCKET=biens
-          CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME
-          CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
-          CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
-          CLOUDINARY_FOLDER=immobile
-          OTP_MODE=disabled
+          cat > .env << EOF
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+          CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
           EOF
-          cp .env assets/.env
-          cat .env
-          echo "=== .env créé et copié dans assets/.env ==="
 
-      - name: Build APK
+      - name: Build APK + AAB
         run: |
-          flet build apk --project immobile --verbose 2>&1 | tee build.log
-          echo "=== APK TROUVÉS ==="
-          find . -name "*.apk" -type f -exec ls -lh {} \;
+          # 1. Build APK (crée le dossier android/)
+          flet build apk --org com.immobile.cameroun --project immobile --verbose
+          # 2. Build AAB (beaucoup plus léger pour Play Store)
+          flet build app --org com.immobile.cameroun --project immobile --verbose || true
+          # Si flet build app ne fait pas AAB, on le fait avec Flutter directement
+          if [ ! -f build/*.aab ] && [ ! -f build/**/*.aab ]; then
+            echo "Build AAB via Flutter..."
+            cd build
+            flutter build appbundle --release --no-tree-shake-icons || true
+            cd ..
+          fi
+          echo "=== Fichiers générés ==="
+          find build -type f \( -name "*.apk" -o -name "*.aab" \) -exec ls -lh {} \;
 
-      - name: Upload APK SEULEMENT (40 Mo)
+      - name: Keep only arm64 APK
+        run: |
+          find build -name "*.apk" ! -name "*arm64*" -delete 2>/dev/null || true
+          find build -name "*.apk" -type f -exec ls -lh {} \;
+          find build -name "*.aab" -type f -exec ls -lh {} \;
+
+      - name: Upload APK arm64 (110 Mo - test direct)
         uses: actions/upload-artifact@v4
         with:
-          name: immobile-apk
-          path: |
-            build/flutter/build/app/outputs/flutter-apk/*.apk
-            build/**/*.apk
+          name: immobile-APK-arm64-110Mo
+          path: build/**/*arm64*.apk
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Upload AAB (70 Mo - Play Store)
+        uses: actions/upload-artifact@v4
+        with:
+          name: immobile-AAB-70Mo-PlayStore
+          path: build/**/*.aab
           if-no-files-found: error
+          retention-days: 7
