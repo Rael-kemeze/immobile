@@ -39,43 +39,38 @@ jobs:
 
       - name: Enable shrink to go under 100Mo
         run: |
-          # Active R8 après que Flet ait créé android/
           GRADLE_FILE=$(find build -name "build.gradle" | grep "app/build.gradle" | head -1)
-          echo "Found: $GRADLE_FILE"
+          echo "Gradle: $GRADLE_FILE"
           if [ -f "$GRADLE_FILE" ]; then
             sed -i 's/minifyEnabled false/minifyEnabled true/g' $GRADLE_FILE || true
             sed -i 's/shrinkResources false/shrinkResources true/g' $GRADLE_FILE || true
-            # Si pas présent, ajoute
             if ! grep -q "minifyEnabled true" $GRADLE_FILE; then
-              echo "Adding minify..."
               sed -i '/release {/a \            minifyEnabled true\n            shrinkResources true' $GRADLE_FILE
             fi
-            cat $GRADLE_FILE | grep -A3 "release {"
+            echo "--- R8 activé ---"
+            grep -A3 "release {" $GRADLE_FILE | head -10
           fi
-          # Proguard file
-          mkdir -p $(dirname $GRADLE_FILE)
-          touch $(dirname $GRADLE_FILE)/proguard-rules.pro
-          # Supprime images lourdes si >1Mo
-          find assets -type f -size +1M -exec ls -lh {} \; 2>/dev/null || true
+          mkdir -p build/app/src/main 2>/dev/null || true
+          touch build/app/proguard-rules.pro 2>/dev/null || true
 
-      - name: Build APK 2 - optimized arm64 only <100Mo
+      - name: Build APK 2 - optimized <100Mo
         run: |
-          cd build
-          flutter build apk --release --split-per-abi --target-platform android-arm64 --no-tree-shake-icons
-          cd ..
+          flet build apk --org com.immobile.cameroun --project immobile --verbose
           find build -name "*.apk" -type f -exec ls -lh {} \;
           # Garde seulement arm64
           find build -name "*.apk" ! -name "*arm64*" -delete 2>/dev/null || true
           echo "=== FINAL ==="
           find build -name "*.apk" -type f -exec ls -lh {} \;
           APK=$(find build -name "*arm64*.apk" | head -1)
-          SIZE=$(stat -c%s "$APK")
-          echo "Taille: $(echo "scale=1; $SIZE/1024/1024" | bc) Mo"
+          if [ -n "$APK" ]; then
+            SIZE=$(stat -c%s "$APK")
+            echo "Taille: $(echo "scale=1; $SIZE/1024/1024" | bc) Mo"
+          fi
 
       - name: Upload APK <100Mo
         uses: actions/upload-artifact@v4
         with:
-          name: immobile-APK-85-95Mo
+          name: immobile-APK-arm64
           path: build/**/*arm64*.apk
           if-no-files-found: error
           retention-days: 3
