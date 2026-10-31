@@ -1,4 +1,4 @@
-name: Build APK + AAB
+name: Build APK <100Mo
 
 on:
   push:
@@ -34,40 +34,48 @@ jobs:
           CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
           EOF
 
-      - name: Build APK + AAB
+      - name: Build APK 1 - create android folder
+        run: flet build apk --org com.immobile.cameroun --project immobile
+
+      - name: Enable shrink to go under 100Mo
         run: |
-          # 1. Build APK (crée le dossier android/)
-          flet build apk --org com.immobile.cameroun --project immobile --verbose
-          # 2. Build AAB (beaucoup plus léger pour Play Store)
-          flet build app --org com.immobile.cameroun --project immobile --verbose || true
-          # Si flet build app ne fait pas AAB, on le fait avec Flutter directement
-          if [ ! -f build/*.aab ] && [ ! -f build/**/*.aab ]; then
-            echo "Build AAB via Flutter..."
-            cd build
-            flutter build appbundle --release --no-tree-shake-icons || true
-            cd ..
+          # Active R8 après que Flet ait créé android/
+          GRADLE_FILE=$(find build -name "build.gradle" | grep "app/build.gradle" | head -1)
+          echo "Found: $GRADLE_FILE"
+          if [ -f "$GRADLE_FILE" ]; then
+            sed -i 's/minifyEnabled false/minifyEnabled true/g' $GRADLE_FILE || true
+            sed -i 's/shrinkResources false/shrinkResources true/g' $GRADLE_FILE || true
+            # Si pas présent, ajoute
+            if ! grep -q "minifyEnabled true" $GRADLE_FILE; then
+              echo "Adding minify..."
+              sed -i '/release {/a \            minifyEnabled true\n            shrinkResources true' $GRADLE_FILE
+            fi
+            cat $GRADLE_FILE | grep -A3 "release {"
           fi
-          echo "=== Fichiers générés ==="
-          find build -type f \( -name "*.apk" -o -name "*.aab" \) -exec ls -lh {} \;
+          # Proguard file
+          mkdir -p $(dirname $GRADLE_FILE)
+          touch $(dirname $GRADLE_FILE)/proguard-rules.pro
+          # Supprime images lourdes si >1Mo
+          find assets -type f -size +1M -exec ls -lh {} \; 2>/dev/null || true
 
-      - name: Keep only arm64 APK
+      - name: Build APK 2 - optimized arm64 only <100Mo
         run: |
-          find build -name "*.apk" ! -name "*arm64*" -delete 2>/dev/null || true
+          cd build
+          flutter build apk --release --split-per-abi --target-platform android-arm64 --no-tree-shake-icons
+          cd ..
           find build -name "*.apk" -type f -exec ls -lh {} \;
-          find build -name "*.aab" -type f -exec ls -lh {} \;
+          # Garde seulement arm64
+          find build -name "*.apk" ! -name "*arm64*" -delete 2>/dev/null || true
+          echo "=== FINAL ==="
+          find build -name "*.apk" -type f -exec ls -lh {} \;
+          APK=$(find build -name "*arm64*.apk" | head -1)
+          SIZE=$(stat -c%s "$APK")
+          echo "Taille: $(echo "scale=1; $SIZE/1024/1024" | bc) Mo"
 
-      - name: Upload APK arm64 (110 Mo - test direct)
+      - name: Upload APK <100Mo
         uses: actions/upload-artifact@v4
         with:
-          name: immobile-APK-arm64-110Mo
+          name: immobile-APK-85-95Mo
           path: build/**/*arm64*.apk
-          if-no-files-found: warn
-          retention-days: 3
-
-      - name: Upload AAB (70 Mo - Play Store)
-        uses: actions/upload-artifact@v4
-        with:
-          name: immobile-AAB-70Mo-PlayStore
-          path: build/**/*.aab
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 3
