@@ -6,26 +6,26 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - uses: subosito/flutter-action@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.6'
+          flutter-version: '3.29.2'
           channel: 'stable'
           cache: true
       - name: Install deps
         run: |
-          python -m pip install --upgrade pip
-          pip install flet==0.27.1 python-dotenv supabase==2.9.1 cloudinary pillow httpx
+          pip install --upgrade pip
+          pip install flet==0.27.1 python-dotenv supabase==2.9.1 cloudinary pillow httpx python-dateutil
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Create .env
         env:
@@ -47,14 +47,14 @@ jobs:
           ENABLE_MONETIZATION=false
           EOF
       - name: Build APK
-        run: flet build apk --verbose --include-packages flet-embed
-      - name: Fix 110Mo rm -rf armeabi x86
+        run: |
+          flet build apk --verbose --include-packages flet-embed || flet build apk --verbose
+          find build -name "*.apk" -exec ls -lh {} \;
+      - name: Fix 110Mo
         run: |
           rm -rf [STRIPPED 69 bytes] 2>/dev/null || true
           find build -type d -name "*armeabi*" -exec rm -rf {} + 2>/dev/null || true
           find build -type d -name "*x86*" -exec rm -rf {} + 2>/dev/null || true
-          find build -type f -name "*armeabi*" -delete 2>/dev/null || true
-          find build -type f -name "*x86*" -delete 2>/dev/null || true
           find build -type f -name "*.apk" -exec ls -lh {} \;
       - uses: actions/upload-artifact@v4
         with:
