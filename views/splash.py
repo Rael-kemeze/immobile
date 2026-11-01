@@ -9,7 +9,7 @@ from services.auth_service import get_session, restore_session
 try:
     ICONS = ft.Icons
 except AttributeError:
-    ICONS = ft.icons
+    ICONS = ft.Icons
 
 def splash_view(page: ft.Page) -> ft.View:
     logo = ft.Column(
