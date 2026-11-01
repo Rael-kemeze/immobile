@@ -1,4 +1,5 @@
 """Splash FIX WHITE SCREEN ANDROID - Sans threading qui plante"""
+
 import flet as ft
 import time
 import threading
