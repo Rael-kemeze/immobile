@@ -1,75 +1,64 @@
-name: Build APK 110Mo
-
+name: Build IMMOBILE APK - 110Mo + Fix White Screen
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
-
 jobs:
-  build:
+  build-apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
+          cache: 'pip'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.2'
+          flutter-version: '3.22.6'
           channel: 'stable'
           cache: true
-
-      - name: Install Flet
+      - name: Install deps
         run: |
-          pip install --upgrade pip
-          pip install flet==0.28.3
-
+          python -m pip install --upgrade pip
+          pip install flet==0.27.1 python-dotenv supabase==2.9.1 cloudinary pillow httpx
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Create .env
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
-          cat > .env << EOF
-          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
-          CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
-          CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+          cat > .env <<EOF
+          SUPABASE_URL=$SUPABASE_URL
+          SUPABASE_KEY=$SUPABASE_KEY
+          SUPABASE_BUCKET=biens
+          CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME
+          CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
+          CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
+          CLOUDINARY_FOLDER=immobile
+          OTP_MODE=disabled
+          ENABLE_MONETIZATION=false
           EOF
-
       - name: Build APK
-        run: flet build apk --org com.immobile.cameroun --project immobile --verbose
-
-      - name: Fix - Supprime armeabi/x86 pour passer de 340Mo à 110Mo
+        run: flet build apk --verbose --include-packages flet-embed
+      - name: Fix 110Mo rm -rf armeabi x86
         run: |
-          echo "=== AVANT ==="
-          find build -type f -name "*.apk" -exec ls -lh {} \;
-          du -sh build
-          
-          echo "=== SUPPRESSION avec rm -rf (pas find -delete) ==="
-          rm -rf build/flutter/.dart_tool/flutter_build/*/armeabi-v7a 2>/dev/null || true
-          rm -rf [STRIPPED 65 bytes] 2>/dev/null || true
-          rm -rf build/flutter/build/build_python_3.12.9/python/lib/python3.12/config-3.12-x86_64* 2>/dev/null || true
-          rm -rf build/flutter/build/app/intermediates/flutter/release/x86_64 2>/dev/null || true
-          rm -rf build/site-packages/armeabi-v7a 2>/dev/null || true
-          rm -rf build/site-packages/x86_64 2>/dev/null || true
-          rm -rf build/site-packages/x86 2>/dev/null || true
+          rm -rf [STRIPPED 69 bytes] 2>/dev/null || true
           find build -type d -name "*armeabi*" -exec rm -rf {} + 2>/dev/null || true
           find build -type d -name "*x86*" -exec rm -rf {} + 2>/dev/null || true
           find build -type f -name "*armeabi*" -delete 2>/dev/null || true
           find build -type f -name "*x86*" -delete 2>/dev/null || true
-          
-          echo "=== APRES (devrait être 110Mo) ==="
           find build -type f -name "*.apk" -exec ls -lh {} \;
-          APK=$(find build -type f -name "*.apk" | head -1)
-          if [ -n "$APK" ]; then
-            ls -lh $APK
-            echo "Taille: $(du -m $APK | cut -f1) Mo"
-          fi
-
-      - name: Upload APK 110Mo
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: immobile-APK-110Mo-1fichier
+          name: immobile-APK-110Mo
           path: build/**/*.apk
           if-no-files-found: error
-          retention-days: 3
+          retention-days: 7
