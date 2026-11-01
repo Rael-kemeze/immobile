@@ -42,7 +42,7 @@ def detail_view(page: ft.Page, bien_id: str) -> ft.View:
     if not bien:
         return ft.View(route=f"/bien/{bien_id}", controls=[ft.Text(t("not_found"))])
 
-    is_desktop = (page.window_width or 0) >= 900
+    is_desktop = ((getattr(page, "window_width", None) or getattr(page, "width", 400) or 400) or 0) >= 900
     is_owner = Session.user and bien.get("user_id") == Session.user["id"]
     is_admin = Session.is_admin()
 

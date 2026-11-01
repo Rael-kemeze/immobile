@@ -75,7 +75,7 @@ def main(page: ft.Page):
         page.window.height = 860
     except:
         # Fallback ancien API si version Flet <0.23
-        page.window_width = 400
+        (getattr(page, "window_width", None) or getattr(page, "width", 400) or 400) = 400
         page.window_height = 860
 
     init_lang(page)

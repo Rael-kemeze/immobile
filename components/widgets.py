@@ -145,7 +145,7 @@ def auth_wrapper(content: ft.Control) -> ft.Control:
 
 def is_desktop(page: ft.Page) -> bool:
     try:
-        return (page.window_width or 0) >= 900
+        return ((getattr(page, 'window_width', None) or getattr(page, 'width', None) or (page.window.width if hasattr(page, 'window') and page.window and hasattr(page.window, 'width') else 400) or 400) or 0) >= 900
     except:
         return False
 
@@ -388,7 +388,7 @@ def bien_card(page: ft.Page, bien: Dict[str, Any], on_open: Callable, on_changed
     first_photo = photos[0] if photos else None
     
     # Responsive image height - larger on desktop
-    is_desktop = (page.window_width or 0) >= 900
+    is_desktop = ((getattr(page, 'window_width', None) or getattr(page, 'width', None) or (page.window.width if hasattr(page, 'window') and page.window and hasattr(page.window, 'width') else 400) or 400) or 0) >= 900
     img_h = 200 if is_desktop else 190
     
     return ft.Container(

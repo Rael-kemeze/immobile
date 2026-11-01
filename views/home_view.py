@@ -81,7 +81,7 @@ def home_view(page: ft.Page) -> ft.View:
             only_active=True,
         )
         biens = monetization.sort_biens_by_monetization(raw_biens)
-        w = page.window_width or 400
+        w = getattr(page, "window_width", None) or getattr(page, "width", None) or (page.window.width if hasattr(page, "window") and page.window and hasattr(page.window, "width") and page.window.width else 400) or 400 or 400
         
         if w >= 1400:
             col_count = 4
@@ -219,7 +219,7 @@ def home_view(page: ft.Page) -> ft.View:
         page.update()
 
     def build_header():
-        w = page.window_width or 400
+        w = getattr(page, "window_width", None) or getattr(page, "width", None) or (page.window.width if hasattr(page, "window") and page.window and hasattr(page.window, "width") and page.window.width else 400) or 400 or 400
         if w >= 900:
             return ft.Column(spacing=10, controls=[
                 ft.Row(spacing=10, controls=[
@@ -254,7 +254,7 @@ def home_view(page: ft.Page) -> ft.View:
         results_container,
     ])
 
-    w = page.window_width or 400
+    w = getattr(page, "window_width", None) or getattr(page, "width", None) or (page.window.width if hasattr(page, "window") and page.window and hasattr(page.window, "width") and page.window.width else 400) or 400 or 400
     if w >= 700:
         body_wrapped = ft.Container(
             alignment=ft.alignment.top_center,
@@ -329,6 +329,8 @@ def home_view(page: ft.Page) -> ft.View:
         padding=0,
     )
 
+FT_NAV_DEST = getattr(ft, "NavigationDestination", None) or getattr(ft, "NavigationBarDestination", None)
+
 def bottom_bar(page: ft.Page, index: int) -> ft.NavigationBar:
     routes = ["/home", "/favoris", "/mes-annonces", "/profile"]
     def on_change(e):
@@ -336,10 +338,10 @@ def bottom_bar(page: ft.Page, index: int) -> ft.NavigationBar:
     return ft.NavigationBar(
         selected_index=index, on_change=on_change, bgcolor="#FFFFFF", indicator_color="#D8EDE2",
         destinations=[
-            ft.NavigationDestination(icon=FT_ICONS.HOME_OUTLINED, label=t("nav_home")),
-            ft.NavigationDestination(icon=FT_ICONS.FAVORITE_BORDER, label=t("nav_favorites")),
-            ft.NavigationDestination(icon=FT_ICONS.LIST_ALT, label=t("nav_my_listings")),
-            ft.NavigationDestination(icon=FT_ICONS.PERSON_OUTLINE, label=t("nav_profile")),
+            FT_NAV_DEST(icon=FT_ICONS.HOME_OUTLINED, label=t("nav_home")),
+            FT_NAV_DEST(icon=FT_ICONS.FAVORITE_BORDER, label=t("nav_favorites")),
+            FT_NAV_DEST(icon=FT_ICONS.LIST_ALT, label=t("nav_my_listings")),
+            FT_NAV_DEST(icon=FT_ICONS.PERSON_OUTLINE, label=t("nav_profile")),
         ],
     )
 

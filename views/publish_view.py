@@ -93,7 +93,7 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
     max_photos = APP_CONFIG["MAX_PHOTOS"]
     photos: List[str] = list(existing_bien.get("photos", []) if is_edit and existing_bien else [])
 
-    is_desktop = (page.window_width or 0) >= 900
+    is_desktop = ((getattr(page, "window_width", None) or getattr(page, "width", 400) or 400) or 0) >= 900
 
     def dropdown(label, options, value):
         return ft.Dropdown(label=label, border_radius=12, filled=True, bgcolor="#FFFFFF", options=options, value=value)

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except AttributeError:
+    FT_ICONS = ft.icons
 from services.config import APP_CONFIG, COLORS
 from services.auth_service import get_session, restore_session
 from services.db import db
@@ -39,12 +43,12 @@ def splash_view(page: ft.Page) -> ft.View:
             border=ft.border.all(1, "#FFC107"),
             content=ft.Column(spacing=6, controls=[
                 ft.Row(spacing=8, controls=[
-                    ft.Icon(ft.icons.SYSTEM_UPDATE, color="#856404"),
+                    ft.Icon(FT_ICONS.SYSTEM_UPDATE, color="#856404"),
                     ft.Text(f"Nouvelle version {info['latest_version']} disponible !", weight=ft.FontWeight.BOLD, color="#856404", size=13),
                 ]),
                 ft.Text(info.get("changelog","Améliorations et corrections"), size=11, color="#856404"),
                 ft.Row(spacing=8, controls=[
-                    ft.ElevatedButton("Mettre à jour", icon=ft.icons.REFRESH, on_click=reload_app, bgcolor="#FFC107", color="#000"),
+                    ft.ElevatedButton("Mettre à jour", icon=FT_ICONS.REFRESH, on_click=reload_app, bgcolor="#FFC107", color="#000"),
                     ft.TextButton("Plus tard", on_click=lambda e: setattr(banner, 'visible', False) or page.update()),
                 ])
             ])
@@ -88,7 +92,7 @@ def splash_view(page: ft.Page) -> ft.View:
         spacing=12,
         controls=[
             ft.Container(width=90, height=90, bgcolor=COLORS["primary"], border_radius=24, alignment=ft.alignment.center,
-                content=ft.Icon(ft.icons.HOME_WORK_ROUNDED, size=48, color="white")),
+                content=ft.Icon(FT_ICONS.HOME_WORK_ROUNDED, size=48, color="white")),
             ft.Text(APP_CONFIG["APP_NAME"], size=32, weight=ft.FontWeight.BOLD, color=COLORS["primary"]),
             ft.Text("Immobilier pour tous", size=14, color=COLORS["muted"]),
             ft.Container(height=20),
