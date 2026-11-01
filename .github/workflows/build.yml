@@ -10,18 +10,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.2'
           channel: 'stable'
           cache: true
+
       - name: Install Flet
         run: |
           pip install --upgrade pip
           pip install flet==0.28.3
+
       - name: Create .env
         run: |
           cat > .env << EOF
@@ -31,32 +35,41 @@ jobs:
           CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
           EOF
+
       - name: Build APK
         run: flet build apk --org com.immobile.cameroun --project immobile --verbose
-      - name: DEBUG + DELETE pour passer de 340Mo à 110Mo
+
+      - name: Fix - Supprime armeabi/x86 pour passer de 340Mo à 110Mo
         run: |
-          echo "=== AVANT (devrait être 3 APK = 340Mo) ==="
-          find build -type f -name "*.apk" | xargs ls -lh
+          echo "=== AVANT ==="
+          find build -type f -name "*.apk" -exec ls -lh {} \;
           du -sh build
-          echo ""
-          echo "=== SUPPRESSION armeabi + x86_64 ==="
-          find build -type f -name "*armeabi*" -print -delete
-          find build -type f -name "*x86*" -print -delete
-          find build -type f -name "*x64*" -print -delete
-          # Garde seulement arm64
-          echo ""
-          echo "=== APRES (devrait être 1 APK = 110Mo) ==="
-          find build -type f -name "*.apk" | xargs ls -lh
-          du -sh build
-          echo ""
-          echo "Taille finale:"
+          
+          echo "=== SUPPRESSION avec rm -rf (pas find -delete) ==="
+          rm -rf build/flutter/.dart_tool/flutter_build/*/armeabi-v7a 2>/dev/null || true
+          rm -rf [STRIPPED 65 bytes] 2>/dev/null || true
+          rm -rf build/flutter/build/build_python_3.12.9/python/lib/python3.12/config-3.12-x86_64* 2>/dev/null || true
+          rm -rf build/flutter/build/app/intermediates/flutter/release/x86_64 2>/dev/null || true
+          rm -rf build/site-packages/armeabi-v7a 2>/dev/null || true
+          rm -rf build/site-packages/x86_64 2>/dev/null || true
+          rm -rf build/site-packages/x86 2>/dev/null || true
+          find build -type d -name "*armeabi*" -exec rm -rf {} + 2>/dev/null || true
+          find build -type d -name "*x86*" -exec rm -rf {} + 2>/dev/null || true
+          find build -type f -name "*armeabi*" -delete 2>/dev/null || true
+          find build -type f -name "*x86*" -delete 2>/dev/null || true
+          
+          echo "=== APRES (devrait être 110Mo) ==="
+          find build -type f -name "*.apk" -exec ls -lh {} \;
           APK=$(find build -type f -name "*.apk" | head -1)
-          ls -lh $APK
-          echo "Size Mo: $(du -m $APK | cut -f1)"
-      - name: Upload 1 APK ONLY
+          if [ -n "$APK" ]; then
+            ls -lh $APK
+            echo "Taille: $(du -m $APK | cut -f1) Mo"
+          fi
+
+      - name: Upload APK 110Mo
         uses: actions/upload-artifact@v4
         with:
-          name: immobile-110Mo-1APK
+          name: immobile-APK-110Mo-1fichier
           path: build/**/*.apk
           if-no-files-found: error
           retention-days: 3
