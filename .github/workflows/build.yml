@@ -1,14 +1,19 @@
-name: Build IMMOBILE APK - 110Mo + Fix White Screen
+name: Build IMMOBILE APK - Fix Claude
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      - name: Cache python standalone
+        uses: actions/cache@v4
+        with:
+          path: /tmp/hostpython*
+          key: python-3.11-standalone
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -16,8 +21,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.2'
           channel: 'stable'
@@ -25,9 +29,8 @@ jobs:
       - name: Install deps
         run: |
           pip install --upgrade pip
-          pip install flet==0.27.1 python-dotenv supabase==2.9.1 cloudinary pillow httpx python-dateutil
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Create .env
+          pip install flet==0.27.1 python-dotenv supabase==2.9.1 cloudinary pillow httpx
+      - name: Create .env (PAS dans assets !)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -43,22 +46,18 @@ jobs:
           CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
           CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
           CLOUDINARY_FOLDER=immobile
-          OTP_MODE=disabled
-          ENABLE_MONETIZATION=false
           EOF
-      - name: Build APK
+      - name: Build APK split-per-abi (1 APK = 1 arch = 40Mo au lieu de 120Mo)
         run: |
-          flet build apk --verbose --include-packages flet-embed || flet build apk --verbose
+          flet build apk --split-per-abi --verbose || flet build apk --verbose
           find build -name "*.apk" -exec ls -lh {} \;
-      - name: Fix 110Mo
+      - name: Fix 110Mo - garde que arm64
         run: |
-          rm -rf [STRIPPED 69 bytes] 2>/dev/null || true
           find build -type d -name "*armeabi*" -exec rm -rf {} + 2>/dev/null || true
           find build -type d -name "*x86*" -exec rm -rf {} + 2>/dev/null || true
-          find build -type f -name "*.apk" -exec ls -lh {} \;
+          find build -name "*.apk" -exec ls -lh {} \;
       - uses: actions/upload-artifact@v4
         with:
-          name: immobile-APK-110Mo
+          name: immobile-APK-FIX-CLAUDE
           path: build/**/*.apk
           if-no-files-found: error
-          retention-days: 7

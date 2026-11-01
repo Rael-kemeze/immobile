@@ -1,10 +1,33 @@
+# Venv
 venv/
-__pycahche__/
+source/
+.venv/
+env/
+
+# Python
+__pycache__/
 *.pyc
-.env
-local_db.json
-essets/uploads/
-uploads
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
+
+# Flet
 build/
 .flet/
-.pytest_cache/
+flutter/
+.pyflet/
+
+# App
+assets/uploads/
+uploads/
+local_db.json
+.env
+.env.bak
+*.log
+*.apk
+*.aab
+
+# OS
+.DS_Store
+Thumbs.db
