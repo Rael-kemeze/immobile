@@ -4,7 +4,7 @@ import flet as ft
 try:
     FT_ICONS = ft.Icons
 except:
-    FT_ICONS = ft.icons
+    FT_ICONS = ft.Icons
 
 from components.widgets import primary_button, snack
 from services.config import COLORS

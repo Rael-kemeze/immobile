@@ -6,7 +6,7 @@ import flet as ft
 try:
     FT_ICONS = ft.Icons
 except AttributeError:
-    FT_ICONS = ft.icons
+    FT_ICONS = ft.Icons
 
 from components.widgets import CountryCitySelector, primary_button, outline_button, snack, text_field
 from services.auth import Session

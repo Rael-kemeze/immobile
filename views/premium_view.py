@@ -5,7 +5,7 @@ import flet as ft
 try:
     FT_ICONS = ft.Icons
 except:
-    FT_ICONS = ft.icons
+    FT_ICONS = ft.Icons
 
 from components.widgets import app_bar, primary_button, snack
 from services.auth import Session

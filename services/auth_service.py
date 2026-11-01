@@ -7,7 +7,7 @@ import flet as ft
 try:
     FT_ICONS = ft.Icons
 except:
-    FT_ICONS = ft.icons
+    FT_ICONS = ft.Icons
 
 from services.auth import Session
 from services.db import db

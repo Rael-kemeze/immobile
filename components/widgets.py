@@ -17,7 +17,7 @@ from services.i18n import t
 try:
     FT_ICONS = ft.Icons
 except AttributeError:
-    FT_ICONS = ft.icons
+    FT_ICONS = ft.Icons
 
 PLACEHOLDER = "https://placehold.co/600x400/0F6B3F/FFFFFF/png?text=IMMOBILE"
 _B64_CACHE: Dict[Any, str] = {}

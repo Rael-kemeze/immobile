@@ -6,7 +6,7 @@ import flet as ft
 try:
     FT_ICONS = ft.Icons
 except:
-    FT_ICONS = ft.icons
+    FT_ICONS = ft.Icons
 
 
 from components.widgets import app_bar, badge, format_prix, image_kwargs, type_label, whatsapp_button, phone_row, snack, admin_actions, flag_image, primary_button, outline_button, wa_url, call_url

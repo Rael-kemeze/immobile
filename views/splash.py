@@ -1,17 +1,22 @@
-"""Splash FIX WHITE SCREEN ANDROID - Sans threading qui plante"""
-
+"""Splash FIX WHITE SCREEN + ft.Icons"""
 import flet as ft
 import time
 import threading
 from services.config import APP_CONFIG, COLORS
 from services.auth_service import get_session, restore_session
 
+# COMPAT
+try:
+    ICONS = ft.Icons
+except AttributeError:
+    ICONS = ft.icons
+
 def splash_view(page: ft.Page) -> ft.View:
     logo = ft.Column(
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         spacing=12,
         controls=[
-            ft.Container(width=90, height=90, bgcolor=COLORS["primary"], border_radius=24, alignment=ft.alignment.center, content=ft.Icon(ft.icons.HOME_WORK_ROUNDED, size=48, color="white")),
+            ft.Container(width=90, height=90, bgcolor=COLORS["primary"], border_radius=24, alignment=ft.alignment.center, content=ft.Icon(ICONS.HOME_WORK_ROUNDED, size=48, color="white")),
             ft.Text(APP_CONFIG["APP_NAME"], size=32, weight=ft.FontWeight.BOLD, color=COLORS["primary"]),
             ft.Text("Immobilier pour tous - Cameroun", size=14, color=COLORS["muted"]),
             ft.Container(height=20),
@@ -44,9 +49,6 @@ def splash_view(page: ft.Page) -> ft.View:
         threading.Thread(target=check_update_async, daemon=True).start()
         threading.Thread(target=go_next, daemon=True).start()
     except:
-        try:
-            page.go("/login")
-        except:
-            pass
+        pass
     content = ft.Container(expand=True, alignment=ft.alignment.center, content=logo)
     return ft.View(route="/splash", bgcolor=COLORS["bg"], controls=[content])

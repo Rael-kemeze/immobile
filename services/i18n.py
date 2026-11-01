@@ -18,7 +18,7 @@ import flet as ft
 try:
     FT_ICONS = ft.Icons
 except:
-    FT_ICONS = ft.icons
+    FT_ICONS = ft.Icons
 
 
 from services.config import DEFAULT_LANGUAGE, LANGUAGES

@@ -6,7 +6,7 @@ import flet as ft
 try:
     FT_ICONS = ft.Icons
 except:
-    FT_ICONS = ft.icons
+    FT_ICONS = ft.Icons
 
 
 FLAG_BASE_URL = "https://flagcdn.com/w40/{code}.png"

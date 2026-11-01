@@ -3,6 +3,16 @@ from __future__ import annotations
 import os
 from urllib.parse import parse_qs
 import flet as ft
+# COMPAT Flet 0.28.3
+try:
+    FT_ICONS = ft.Icons
+except:
+    FT_ICONS = ft.icons
+try:
+    ft.Icons.HOME_WORK_ROUNDED
+except:
+    ft.Icons = ft.icons
+
 
 from services.auth import Session
 from services.auth_service import get_session, restore_session
@@ -20,7 +30,7 @@ from views.splash import splash_view
 from views.user_views import favoris_view, mes_annonces_view, notifications_view, profile_view
 
 def maintenance_view(page: ft.Page) -> ft.View:
-    return ft.View(route="/maintenance", bgcolor=COLORS["primary_dark"], padding=30, vertical_alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[ft.Icon(ft.icons.BUILD_CIRCLE, size=80, color=COLORS["accent"]), ft.Text("Maintenance en cours", size=24, weight=ft.FontWeight.BOLD, color="#FFFFFF"), ft.Text("IMMOBILE sera de retour tres bientot.", color="#DDE4DF", text_align=ft.TextAlign.CENTER)])
+    return ft.View(route="/maintenance", bgcolor=COLORS["primary_dark"], padding=30, vertical_alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[ft.Icon(ft.Icons.BUILD_CIRCLE, size=80, color=COLORS["accent"]), ft.Text("Maintenance en cours", size=24, weight=ft.FontWeight.BOLD, color="#FFFFFF"), ft.Text("IMMOBILE sera de retour tres bientot.", color="#DDE4DF", text_align=ft.TextAlign.CENTER)])
 
 def main(page: ft.Page):
     page.title = APP_CONFIG["APP_NAME"]
