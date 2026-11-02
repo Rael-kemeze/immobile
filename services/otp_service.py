@@ -47,3 +47,9 @@ def send_verification_code(phone: str, username: str = "", email: str = "") -> T
     except Exception as e:
         print(f"[OTP] save ignored: {e}")
     return True, "Mode sans vérif - compte direct"
+
+
+def send_code(phone: str, code: str, username: str = "") -> bool:
+    """Envoi du code (mode sans verification : aucun SMS/WhatsApp n'est envoye)."""
+    print(f"[OTP] code pour {phone} : {code}")
+    return True

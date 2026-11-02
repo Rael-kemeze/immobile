@@ -4,30 +4,33 @@ version = "1.0.1"
 description = "IMMOBILE - Immobilier Cameroun - Bafoussam, Yaounde, Douala"
 readme = "README.md"
 requires-python = ">=3.9"
+# VERSIONS FIGEES : sans numero de version, "flet" et "supabase" installent la
+# toute derniere version, incompatible avec ce code (ecran blanc sur Android).
+# Flet 0.28.3 doit etre IDENTIQUE a la version du CLI qui construit l'APK.
 dependencies = [
-    "flet",
-    "supabase",
-    "python-dotenv",
+    "flet==0.28.3",
+    "supabase==2.9.1",
+    "python-dotenv==1.0.1",
     "cloudinary",
     "Pillow",
-    "requests",
 ]
-
-[project.scripts]
-immobile = "main:main"
 
 [tool.flet]
 org = "com.immobile.cameroun"
 project = "immobile"
 description = "IMMOBILE - Immobilier pour tous - Cameroun"
-# L'icône sera prise automatiquement depuis assets/icon.png si elle existe
-# Tu peux aussi forcer ici :
-icon = "assets/icon.png"
-
-[tool.flet.icons]
-# Android & iOS icons
 icon = "assets/icon.png"
 
 [tool.flet.splash]
-# Splash screen
-background = "#0F6B3E"
+# Couleur de l'ecran de demarrage (la cle est "color", pas "background").
+color = "#0F6B3E"
+dark_color = "#0F6B3E"
+
+[tool.flet.android]
+# Un APK par architecture CPU au lieu d'un gros APK universel.
+split_per_abi = true
+
+[tool.flet.app]
+# Flet empaquette TOUT le dossier du projet (seul "build" est ignore par defaut).
+# On retire ici ce qui n'a rien a faire dans l'APK.
+exclude = ["venv", ".venv", "source", ".git", ".github", "uploads", "assets/uploads", "local_db.json", "apk"]

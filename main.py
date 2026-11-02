@@ -1,26 +1,90 @@
-"""IMMOBILE - FIX Claude: splash immédiat + erreur visible"""
+"""IMMOBILE - Application immobiliere internationale.
+
+Flet 0.28.3 / Python 3.11+
+Lancement :  python main.py
+"""
+
 from __future__ import annotations
+
+import importlib
 import os
+import time
 import traceback
-import threading
 from urllib.parse import parse_qs
+
 import flet as ft
+try:
+    FT_ICONS = ft.Icons
+except Exception:
+    FT_ICONS = ft.icons
 
 from services.auth import Session
-from services.auth_service import get_session, restore_session
 from services.config import APP_CONFIG, COLORS, LANGUAGES
-from services.db import WEB_UPLOAD_DIR, db
+from services.db import WEB_UPLOAD_DIR
 from services.i18n import init_lang, set_lang
 
-try:
-    ICONS = ft.Icons
-except:
-    ICONS = ft.icons
+
+def _view(module: str, name: str):
+    """Charge une vue a la demande.
+
+    Un probleme dans UNE vue (import, icone inconnue...) ne bloque plus tout le
+    demarrage : l'erreur s'affiche a l'ecran au lieu d'une page blanche.
+    """
+    return getattr(importlib.import_module(module), name)
+
 
 def maintenance_view(page: ft.Page) -> ft.View:
-    return ft.View(route="/maintenance", bgcolor=COLORS["primary_dark"], padding=30, vertical_alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER, controls=[ft.Icon(ICONS.BUILD_CIRCLE, size=80, color=COLORS["accent"]), ft.Text("Maintenance", size=24, weight=ft.FontWeight.BOLD, color="#FFFFFF")])
+    return ft.View(
+        route="/maintenance",
+        bgcolor=COLORS["primary_dark"],
+        padding=30,
+        vertical_alignment=ft.MainAxisAlignment.CENTER,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        controls=[
+            ft.Icon(FT_ICONS.BUILD_CIRCLE, size=80, color=COLORS["accent"]),
+            ft.Text("Maintenance en cours", size=24, weight=ft.FontWeight.BOLD, color="#FFFFFF"),
+            ft.Text(
+                "IMMOBILE sera de retour tres bientot. Merci de votre patience.",
+                color="#DDE4DF",
+                text_align=ft.TextAlign.CENTER,
+            ),
+        ],
+    )
 
-def main(page: ft.Page):
+
+def error_view(page: ft.Page, details: str) -> ft.View:
+    """Ecran d'erreur : remplace la page blanche silencieuse."""
+    return ft.View(
+        route="/error",
+        bgcolor="#FFFFFF",
+        padding=16,
+        scroll=ft.ScrollMode.AUTO,
+        controls=[
+            ft.Icon(FT_ICONS.ERROR_OUTLINE, size=48, color=COLORS["danger"]),
+            ft.Text("Une erreur est survenue", size=20, weight=ft.FontWeight.BOLD, color=COLORS["danger"]),
+            ft.Text("Faites une capture d'ecran de cette page pour la corriger.", size=12, color=COLORS["muted"]),
+            ft.Text(details, size=10, selectable=True),
+            ft.ElevatedButton(
+                "Reessayer",
+                # le "?r=" force un vrai changement de route meme si on y est deja
+                on_click=lambda e: page.go(f"/splash?r={time.time_ns()}"),
+            ),
+        ],
+    )
+
+
+def show_error(page: ft.Page) -> None:
+    details = traceback.format_exc()
+    print("[IMMOBILE] ERREUR :\n" + details)
+    try:
+        page.views.clear()
+        page.views.append(error_view(page, details[-1800:]))
+        page.update()
+    except Exception:
+        pass
+
+
+def setup_app(page: ft.Page) -> None:
     page.title = APP_CONFIG["APP_NAME"]
     page.bgcolor = COLORS["bg"]
     page.theme_mode = ft.ThemeMode.LIGHT
@@ -29,110 +93,115 @@ def main(page: ft.Page):
     try:
         page.window.width = 400
         page.window.height = 860
-    except:
+    except Exception:
         try:
             page.window_width = 400
             page.window_height = 860
-        except:
+        except Exception:
             pass
+
     init_lang(page)
 
-    def show_error(title, err):
-        tb = traceback.format_exc()
-        print(f"[CRASH] {title}: {err}\n{tb}")
-        page.views.clear()
-        page.views.append(ft.View(route="/error", bgcolor="#FFFFFF", scroll=ft.ScrollMode.AUTO, controls=[ft.Container(padding=20, content=ft.Column(spacing=10, controls=[ft.Icon(ICONS.ERROR, size=60, color="red"), ft.Text("Erreur", size=24, weight=ft.FontWeight.BOLD, color="red"), ft.Text(f"{title}: {err}", color="black", selectable=True), ft.Container(bgcolor="#FFE0E0", padding=10, border_radius=8, content=ft.Text(tb[-3000:], size=10, color="black", selectable=True)), ft.ElevatedButton("Login", on_click=lambda e: page.go("/login"))]))]))
-        try:
-            page.update()
-        except:
-            pass
-
     def route_change(e: ft.RouteChangeEvent):
-        try:
-            raw_route = page.route or "/"
-            route, _, query = raw_route.partition("?")
-            if route.startswith("/lang/"):
-                set_lang(page, route.split("/lang/", 1)[1].strip("/"))
-                page.go("/home" if Session.user else "/login")
-                return
-            wanted = (parse_qs(query).get("lang") or [None])[0]
-            if wanted in LANGUAGES:
-                set_lang(page, wanted)
-            page.views.clear()
-            if APP_CONFIG["MAINTENANCE_MODE"] and not Session.is_admin():
-                page.views.append(maintenance_view(page))
-                page.update()
-                return
-            from views.splash import splash_view
-            from views.auth_view import login_view, register_view, register_cgu_view, verify_otp_view
-            from views.home_view import home_view
-            from views.publish_view import publish_view
-            from views.detail_view import detail_view
-            from views.admin_view import admin_view
-            from views.settings import settings_view
-            from views.alerts import alerts_view
-            from views.user_views import favoris_view, mes_annonces_view, notifications_view, profile_view
+        raw_route = page.route or "/"
+        route, _, query = raw_route.partition("?")
 
-            if route == "/splash":
-                page.views.append(splash_view(page))
-            elif route == "/register":
-                page.views.append(register_view(page))
-            elif route == "/cgu":
-                page.views.append(register_cgu_view(page))
-            elif route == "/verify-otp":
-                page.views.append(verify_otp_view(page))
-            elif route in ("/", "/login") or not Session.user:
-                page.views.append(login_view(page))
-            elif route == "/admin" and Session.is_admin():
-                page.views.append(admin_view(page))
-            elif route.startswith("/bien/"):
-                page.views.append(detail_view(page, route.split("/bien/")[1]))
-            elif route == "/publish":
-                page.views.append(publish_view(page))
-            elif route == "/favoris":
-                page.views.append(favoris_view(page))
-            elif route == "/mes-annonces":
-                page.views.append(mes_annonces_view(page))
-            elif route == "/profile":
-                page.views.append(profile_view(page))
-            elif route == "/settings":
-                page.views.append(settings_view(page))
-            elif route == "/alerts":
-                page.views.append(alerts_view(page))
-            elif route == "/notifications":
-                page.views.append(notifications_view(page))
-            else:
-                page.views.append(home_view(page))
+        if route.startswith("/lang/"):
+            set_lang(page, route.split("/lang/", 1)[1].strip("/"))
+            page.go("/home" if Session.user else "/login")
+            return
+        wanted = (parse_qs(query).get("lang") or [None])[0]
+        if wanted in LANGUAGES:
+            set_lang(page, wanted)
+
+        page.views.clear()
+
+        if APP_CONFIG["MAINTENANCE_MODE"] and not Session.is_admin():
+            page.views.append(maintenance_view(page))
             page.update()
-        except Exception as err:
-            show_error(f"route {page.route}", err)
+            return
+
+        # Routes publiques
+        if route == "/splash":
+            view = _view("views.splash", "splash_view")(page)
+        elif route == "/register":
+            view = _view("views.auth_view", "register_view")(page)
+        elif route == "/cgu":
+            view = _view("views.auth_view", "register_cgu_view")(page)
+        elif route == "/verify-otp":
+            view = _view("views.auth_view", "verify_otp_view")(page)
+        elif route == "/forgot-password":
+            view = _view("views.forgot_password_view", "forgot_password_view")(page)
+        elif route == "/verify-reset-otp":
+            view = _view("views.forgot_password_view", "verify_reset_otp_view")(page)
+        elif route == "/reset-password":
+            view = _view("views.forgot_password_view", "reset_password_view")(page)
+        elif route in ("/", "/login") or not Session.user:
+            view = _view("views.auth_view", "login_view")(page)
+        # Routes privees
+        elif route == "/admin" and Session.is_admin():
+            view = _view("views.admin_view", "admin_view")(page)
+        elif route == "/admin/storage" and Session.is_admin():
+            view = _view("views.admin_storage_view", "maintenance_view")(page)
+        elif route == "/admin/remote" and Session.is_admin():
+            view = _view("views.admin_remote_config_view", "remote_config_view")(page)
+        elif route.startswith("/bien/"):
+            view = _view("views.detail_view", "detail_view")(page, route.split("/bien/")[1])
+        elif route == "/publish":
+            view = _view("views.publish_view", "publish_view")(page)
+        elif route.startswith("/edit/"):
+            view = _view("views.publish_view", "publish_view")(page, bien_id=route.split("/edit/")[1])
+        elif route == "/favoris":
+            view = _view("views.user_views", "favoris_view")(page)
+        elif route == "/mes-annonces":
+            view = _view("views.user_views", "mes_annonces_view")(page)
+        elif route == "/profile":
+            view = _view("views.user_views", "profile_view")(page)
+        elif route == "/settings":
+            view = _view("views.settings", "settings_view")(page)
+        elif route == "/alerts":
+            view = _view("views.alerts", "alerts_view")(page)
+        elif route == "/notifications":
+            view = _view("views.user_views", "notifications_view")(page)
+        else:
+            view = _view("views.home_view", "home_view")(page)
+
+        page.views.append(view)
+        page.update()
+
+    def safe_route_change(e: ft.RouteChangeEvent):
+        # Si la construction d'une vue plante, on affiche l'erreur au lieu de
+        # laisser la liste des vues vide (= page blanche).
+        try:
+            route_change(e)
+        except Exception:
+            show_error(page)
 
     def view_pop(e):
         if len(page.views) > 1:
             page.views.pop()
             page.go(page.views[-1].route)
 
-    page.on_route_change = route_change
+    page.on_route_change = safe_route_change
     page.on_view_pop = view_pop
 
-    def on_biens_change(payload=None):
-        try:
-            if page.route == "/home":
-                page.go("/home")
-        except:
-            pass
-    db.subscribe_biens(on_biens_change)
-
-    # FIX CLAUDE: Affiche splash IMMEDIATEMENT, pas de restore_session bloquant
+    # Aucun appel reseau ici : on affiche TOUT DE SUITE le splash. C'est lui qui
+    # restaure la session en arriere-plan (voir views/splash.py).
+    # Le temps reel (db.subscribe_biens) n'est plus lance au demarrage : il n'est
+    # pas indispensable et pouvait retarder l'affichage sur mobile.
     page.go("/splash")
 
-if __name__ == "__main__":
-    os.makedirs(WEB_UPLOAD_DIR, exist_ok=True)
+
+def main(page: ft.Page):
     try:
-        ft.app(target=main, assets_dir="assets", upload_dir=str(WEB_UPLOAD_DIR))
-    except AttributeError:
-        try:
-            ft.run(main)
-        except:
-            import flet
-            flet.app(target=main)
+        setup_app(page)
+    except Exception:
+        show_error(page)
+
+
+if __name__ == "__main__":
+    try:
+        os.makedirs(WEB_UPLOAD_DIR, exist_ok=True)
+    except Exception as exc:
+        print(f"[IMMOBILE] dossier uploads non cree ({exc})")
+    ft.app(target=main, assets_dir="assets", upload_dir=str(WEB_UPLOAD_DIR))

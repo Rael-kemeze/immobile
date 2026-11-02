@@ -1,33 +1,26 @@
-# Venv
+# Environnements virtuels (ne jamais commiter)
 venv/
-source/
 .venv/
-env/
+source/
 
 # Python
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.pytest_cache/
-*.egg-info/
 
-# Flet
-build/
-.flet/
-flutter/
-.pyflet/
-
-# App
-assets/uploads/
-uploads/
-local_db.json
+# Secrets et fichiers generes
 .env
 .env.bak
-*.log
-*.apk
-*.aab
+services/app_env.py
+local_db.json
 
-# OS
-.DS_Store
-Thumbs.db
+# Donnees de test / uploads
+assets/uploads/
+uploads/
+
+# Build
+build/
+apk/
+.flet/
+.pytest_cache/
+.sauvegarde_avant_corrections_*/
+build.log
