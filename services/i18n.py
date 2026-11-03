@@ -100,7 +100,7 @@ translations = {
         # --- Nav ---
         "nav_home": "Accueil",
         "nav_favorites": "Favoris",
-        "nav_my_listings": "Mes annonces",
+        "nav_my_listings": "Annonces",
         "nav_profile": "Profil",
         "nav_alerts": "Alertes",
         # --- Publish ---
@@ -211,7 +211,7 @@ translations = {
         "whatsapp_contact": "Contact via WhatsApp",
         "nav_home": "Home",
         "nav_favorites": "Favorites",
-        "nav_my_listings": "My listings",
+        "nav_my_listings": "Listings",
         "nav_profile": "Profile",
         "nav_alerts": "Alerts",
         "publish_title": "Publish a listing",
@@ -318,7 +318,7 @@ translations = {
         "whatsapp_contact": "Contactar por WhatsApp",
         "nav_home": "Inicio",
         "nav_favorites": "Favoritos",
-        "nav_my_listings": "Mis anuncios",
+        "nav_my_listings": "Anuncios",
         "nav_profile": "Perfil",
         "nav_alerts": "Alertas",
         "publish_title": "Publicar un inmueble",

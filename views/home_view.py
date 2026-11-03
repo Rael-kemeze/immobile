@@ -322,7 +322,7 @@ def home_view(page: ft.Page) -> ft.View:
     # ===== MENU DRAWER - SEUL AJOUT =====
     def handle_drawer(e):
         idx = e.control.selected_index
-        routes = ["/home", "/favoris", "/mes-annonces", "/publish", "/profile", "/notifications", "/settings", "logout"]
+        routes = ["/home", "/favoris", "/annonces", "/publish", "/profile", "/notifications", "/settings", "logout"]
         r = routes[idx] if idx < len(routes) else "/home"
         drawer.open = False
         page.update()
@@ -386,7 +386,7 @@ def home_view(page: ft.Page) -> ft.View:
 FT_NAV_DEST = getattr(ft, "NavigationDestination", None) or getattr(ft, "NavigationBarDestination", None)
 
 def bottom_bar(page: ft.Page, index: int) -> ft.NavigationBar:
-    routes = ["/home", "/favoris", "/mes-annonces", "/profile"]
+    routes = ["/home", "/favoris", "/annonces", "/profile"]
     def on_change(e):
         page.go(routes[e.control.selected_index])
     return ft.NavigationBar(

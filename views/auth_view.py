@@ -62,7 +62,7 @@ def register_view(page):
     form_data = {"username": "", "email": "", "phone": "", "country_code": DEFAULT_COUNTRY_CODE, "city": "", "locality": "", "password": ""}
     username = text_field("Nom d'utilisateur *", prefix_icon=FT_ICONS.PERSON)
     email = text_field("Email", prefix_icon=FT_ICONS.EMAIL, keyboard_type=ft.KeyboardType.EMAIL)
-    phone = text_field("Numéro de téléphone * (ex: 6XXXXXXXX)", prefix_icon=FT_ICONS.PHONE)
+    phone = text_field("Numéro de téléphone *", prefix_icon=FT_ICONS.PHONE)
     phone.value = get_dial(DEFAULT_COUNTRY_CODE)
     dial_state = {"dial": phone.value}
     locality = text_field("Quartier *", prefix_icon=FT_ICONS.LOCATION_ON)
