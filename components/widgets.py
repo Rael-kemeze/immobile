@@ -22,11 +22,21 @@ except AttributeError:
 PLACEHOLDER = "https://placehold.co/600x400/0F6B3F/FFFFFF/png?text=IMMOBILE"
 _B64_CACHE: Dict[Any, str] = {}
 
-def image_kwargs(src: Optional[str]) -> Dict[str, str]:
+def thumb_url(url: str, width: Optional[int] = None) -> str:
+    """Miniature Cloudinary : beaucoup plus legere que la photo d'origine (donnees mobiles)."""
+    if not width or "res.cloudinary.com" not in url or "/image/upload/" not in url:
+        return url
+    head, tail = url.split("/image/upload/", 1)
+    if tail.startswith(("w_", "c_", "q_", "f_", "h_", "ar_")):  # deja transformee
+        return url
+    return f"{head}/image/upload/c_limit,w_{width},q_auto/{tail}"
+
+
+def image_kwargs(src: Optional[str], width: Optional[int] = None) -> Dict[str, str]:
     if not src:
         return {"src": PLACEHOLDER}
     if src.startswith(("http://", "https://", "data:")):
-        return {"src": src}
+        return {"src": thumb_url(src, width)}
     path = PPath(src)
     if not path.is_absolute():
         path = ASSETS_DIR / src
@@ -373,7 +383,7 @@ class CountryCitySelector:
         return (self.city_dd.value or "").strip()
 
 def bien_card(page: ft.Page, bien: Dict[str, Any], on_open: Callable, on_changed: Optional[Callable]=None):
-    is_fav = db.is_favori(Session.user["id"], bien["id"]) if Session.user else False
+    is_fav = (bien["id"] in db.favori_ids(Session.user["id"])) if Session.user else False
     def toggle_fav(e):
         if not Session.user:
             page.go("/login")
@@ -402,7 +412,7 @@ def bien_card(page: ft.Page, bien: Dict[str, Any], on_open: Callable, on_changed
                     height=img_h,
                     width=float("inf"),
                     clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
-                    content=ft.Image(**image_kwargs(first_photo), width=float("inf"), height=img_h, fit=ft.ImageFit.COVER),
+                    content=ft.Image(**image_kwargs(first_photo, width=640), width=float("inf"), height=img_h, fit=ft.ImageFit.COVER),
                 ),
                 ft.Container(top=10, left=10, content=ft.Column(spacing=6, controls=[
                     ft.Row(spacing=6, controls=[

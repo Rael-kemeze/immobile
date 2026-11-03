@@ -25,12 +25,16 @@ def splash_view(page: ft.Page) -> ft.View:
         ]
     )
     def go_next():
-        time.sleep(1.5)
+        started = time.time()
         try:
             try:
                 has_session = get_session(page) and restore_session(page)
             except:
                 has_session = False
+            # le logo reste visible 0,8 s minimum (pas de flash), sans attente inutile
+            remaining = 0.8 - (time.time() - started)
+            if remaining > 0:
+                time.sleep(remaining)
             page.go("/home" if has_session else "/login")
         except Exception as e:
             print(f"[Splash] {e}")

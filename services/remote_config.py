@@ -10,7 +10,7 @@ from datetime import datetime
 # Cache local pour éviter trop d'appels
 _CACHE: Dict[str, Any] = {}
 _CACHE_TIME: float = 0
-CACHE_TTL = 60  # 1 minute
+CACHE_TTL = 300  # 5 minutes (le rechargement bloquait parfois l'affichage)
 
 DEFAULT_CONFIG = {
     "id": "main",

@@ -9,6 +9,7 @@
 #     bash build_apk.sh                     # APK par architecture dans ./apk
 #     ARCH="arm64-v8a" bash build_apk.sh    # une seule architecture (plus rapide)
 #     bash build_apk.sh --propre            # repart de zero (vide le cache de build)
+#     COMPILE=1 bash build_apk.sh           # precompile le code (.pyc) : demarrage plus rapide
 # =============================================================================
 set -euo pipefail
 
@@ -76,6 +77,7 @@ ok "$N fichiers, $((S / 1024)) Mo a empaqueter (avant : plus de 12 000 fichiers 
 say "3/4  Construction de l'APK (premiere fois : plusieurs minutes)"
 ARGS=(build apk --project immobile --split-per-abi --verbose)
 [ -n "${ARCH:-}" ] && ARGS+=(--arch $ARCH)
+[ "${COMPILE:-0}" = 1 ] && ARGS+=(--compile-app --compile-packages)
 ( cd "$STAGE" && "$FLET" "${ARGS[@]}" ) 2>&1 | tee "$ROOT/build.log" || die "Le build a echoue. Journal complet : $ROOT/build.log"
 
 # --------------------------------------------------------------- 4. resultat

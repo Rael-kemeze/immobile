@@ -1,6 +1,7 @@
 """Accueil : recherche, filtres (dont pays), liste des biens - RESPONSIVE FIX PC/TABLETTE + MENU."""
 
 from __future__ import annotations
+import threading
 import flet as ft
 try:
     FT_ICONS = ft.Icons
@@ -29,6 +30,7 @@ STATE = {
 }
 
 HOME_COUNTRY_KEY = "home_country"
+PAGE_SIZE = 12  # annonces affichees d'un coup (chaque carte = ~45 elements a envoyer au telephone)
 
 def reset_home_state():
     STATE.update(
@@ -69,6 +71,8 @@ def home_view(page: ft.Page) -> ft.View:
     results_container = ft.Container(expand=True)
 
     def refresh(e=None):
+        if e is not None:  # clic sur le bouton "actualiser" : on force le rechargement
+            db.invalidate_cache()
         raw_biens = db.list_biens(
             search=STATE["search"],
             categorie=STATE["categorie"],
@@ -81,6 +85,41 @@ def home_view(page: ft.Page) -> ft.View:
             only_active=True,
         )
         biens = monetization.sort_biens_by_monetization(raw_biens)
+
+        # Pagination : on n'affiche que les premieres annonces, la suite via "Voir plus".
+        page_key = (STATE["search"], STATE["categorie"], STATE["transaction"], STATE["city"],
+                    STATE["country_code"], STATE["prix_min"], STATE["prix_max"], STATE["prix_discutable"])
+        if STATE.get("page_key") != page_key:  # nouveau filtre : on repart de la 1re page
+            STATE["page_key"] = page_key
+            STATE["shown"] = PAGE_SIZE
+        total = len(biens)
+
+        def _more_button():
+            label_more = t("see_more")
+            if not label_more or label_more == "see_more":
+                label_more = "Voir plus"
+            return ft.Container(
+                padding=ft.padding.symmetric(vertical=8),
+                alignment=ft.alignment.center,
+                content=ft.OutlinedButton(f"{label_more} ({total - STATE['shown']})", on_click=more),
+            )
+
+        def more(e):
+            container = results_container.content
+            start = STATE["shown"]
+            STATE["shown"] = start + PAGE_SIZE
+            if container.controls:
+                container.controls.pop()  # retire le bouton "Voir plus"
+            container.controls.extend(bien_card(page, b, open_bien, refresh) for b in biens[start:STATE["shown"]])
+            if total > STATE["shown"]:
+                container.controls.append(_more_button())
+            page.update()
+
+        def _cards():
+            cards = [bien_card(page, b, open_bien, refresh) for b in biens[:STATE["shown"]]]
+            if total > STATE["shown"]:
+                cards.append(_more_button())
+            return cards
         w = getattr(page, "window_width", None) or getattr(page, "width", None) or (page.window.width if hasattr(page, "window") and page.window and hasattr(page.window, "width") and page.window.width else 400) or 400 or 400
         
         if w >= 1400:
@@ -113,7 +152,7 @@ def home_view(page: ft.Page) -> ft.View:
                 expand=True,
                 spacing=12,
                 padding=ft.padding.only(bottom=80),
-                controls=[bien_card(page, b, open_bien, refresh) for b in biens]
+                controls=_cards()
             )
         else:
             results_container.content = ft.GridView(
@@ -124,7 +163,7 @@ def home_view(page: ft.Page) -> ft.View:
                 spacing=16,
                 run_spacing=16,
                 padding=ft.padding.only(bottom=80, top=4),
-                controls=[bien_card(page, b, open_bien, refresh) for b in biens]
+                controls=_cards()
             )
         page.update()
 
@@ -246,7 +285,22 @@ def home_view(page: ft.Page) -> ft.View:
         refresh()
 
     page.on_resized = on_resize
-    refresh()
+
+    def _first_load():
+        try:
+            refresh()
+        except Exception as exc:
+            print(f"[HOME] chargement impossible : {exc}")
+            results_container.content = empty_state(t("no_results"))
+            page.update()
+
+    if db.has_cache("biens"):
+        refresh()  # donnees deja en memoire : affichage instantane
+    else:
+        # Premier affichage immediat (squelettes) ; les annonces arrivent juste apres,
+        # chargees en arriere-plan, au lieu de bloquer l'ecran pendant les requetes reseau.
+        results_container.content = ft.Column(spacing=12, controls=[skeleton_card() for _ in range(3)])
+        threading.Thread(target=_first_load, daemon=True).start()
 
     body = ft.Column(expand=True, spacing=0, controls=[
         header_container,

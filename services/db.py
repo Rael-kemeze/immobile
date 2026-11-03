@@ -1,12 +1,15 @@
 """Couche d'acces aux donnees - FIX SUPABASE .env support."""
 
 from __future__ import annotations
+import copy
+import functools
 import hashlib
 import io
 import json
 import os
 import re
 import threading
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -441,16 +444,57 @@ class Database:
         return bien
 
 
+    # ------------------------------------------------------------------ cache de lecture
+    CACHE_TTL = 30  # secondes
+
+    def _cached(self, key, loader):
+        """Evite de re-telecharger les memes donnees a chaque ecran (reseau mobile lent)."""
+        store = self.__dict__.setdefault("_cache", {})
+        hit = store.get(key)
+        if hit is not None and (time.time() - hit[0]) < self.CACHE_TTL:
+            return copy.deepcopy(hit[1])
+        value = loader()
+        store[key] = (time.time(), value)
+        return copy.deepcopy(value)
+
+    def invalidate_cache(self, kind: Optional[str] = None) -> None:
+        """Vide le cache (tout, ou seulement 'biens' / 'fav')."""
+        store = self.__dict__.setdefault("_cache", {})
+        for k in list(store):
+            if kind is None or k[0] == kind:
+                store.pop(k, None)
+
+    def has_cache(self, kind: str) -> bool:
+        """True si des donnees `kind` encore fraiches sont deja en memoire (toujours True en mode local)."""
+        if self.mode != "supabase":
+            return True
+        now = time.time()
+        return any(k[0] == kind and (now - v[0]) < self.CACHE_TTL for k, v in list(self.__dict__.get("_cache", {}).items()))
+
+    def favori_ids(self, user_id: str) -> set:
+        """Ids des annonces favorites en UNE requete (avant : une requete par carte d'annonce)."""
+        if self.mode == "supabase":
+            def _load():
+                res = self.client.table("favoris").select("bien_id").eq("user_id", user_id).execute()
+                return [r["bien_id"] for r in (res.data or [])]
+            return set(self._cached(("fav", user_id), _load))
+        return {f["bien_id"] for f in self.data["favoris"] if f["user_id"] == user_id}
+
     def list_biens(self, search: str = "", type_bien: Optional[str] = None, transaction: Optional[str] = None, categorie: Optional[str] = None, city: Optional[str] = None, country_code: Optional[str] = None, prix_min: Optional[int] = None, prix_max: Optional[int] = None, prix_discutable: bool = False, only_active: bool = True, user_id: Optional[str] = None, status: Optional[str] = None) -> List[Dict[str, Any]]:
         if self.mode == "supabase":
-            q = self.client.table("biens").select("*")
-            if only_active:
-                q = q.eq("is_active", True)
-            if user_id:
-                q = q.eq("user_id", user_id)
-            if status:
-                q = q.eq("status", status)
-            rows = q.order("created_at", desc=True).execute().data or []
+            def _load():
+                q = self.client.table("biens").select("*")
+                if only_active:
+                    q = q.eq("is_active", True)
+                if user_id:
+                    q = q.eq("user_id", user_id)
+                if status:
+                    q = q.eq("status", status)
+                return q.order("created_at", desc=True).execute().data or []
+
+            # Les lignes brutes sont gardees en cache : recherche et filtres s'appliquent
+            # ensuite en memoire (instantane) au lieu de re-telecharger toute la liste.
+            rows = self._cached(("biens", bool(only_active), user_id or "", status or ""), _load)
         else:
             rows = sorted(self.data["biens"], key=lambda b: b.get("created_at", ""), reverse=True)
             if only_active:
@@ -581,6 +625,13 @@ class Database:
             ids = [r["bien_id"] for r in (res.data or [])]
         else:
             ids = [f["bien_id"] for f in self.data["favoris"] if f["user_id"] == user_id]
+        if self.mode == "supabase" and ids:
+            # une requete par lot de 50 favoris (avant : une requete PAR favori)
+            by_id = {}
+            for k in range(0, len(ids), 50):
+                res = self.client.table("biens").select("*").in_("id", ids[k:k + 50]).execute()
+                by_id.update({b["id"]: b for b in (res.data or [])})
+            return [by_id[i] for i in ids if i in by_id]
         biens = [self.get_bien(i) for i in ids]
         return [b for b in biens if b]
 
@@ -1123,6 +1174,28 @@ class Database:
             "old_data": old,
             "saved_mb": round((stats_before.get("storage_size_bytes",0) - stats_after.get("storage_size_bytes",0)) / (1024*1024), 2)
         }
+
+
+def _invalidate_after(method_name: str, kind: Optional[str] = None) -> None:
+    """Apres une ecriture, les donnees en cache ne sont plus fiables : on les vide."""
+    original = getattr(Database, method_name)
+
+    @functools.wraps(original)
+    def wrapper(self, *args, **kwargs):
+        try:
+            return original(self, *args, **kwargs)
+        finally:
+            self.invalidate_cache(kind)
+
+    setattr(Database, method_name, wrapper)
+
+
+for _name in ("create_bien", "update_bien", "approve_bien", "delete_bien", "delete_user",
+              "cleanup_orphan_photos", "cleanup_old_data", "delete_old_inactive_biens", "optimize_storage"):
+    if hasattr(Database, _name):
+        _invalidate_after(_name)
+if hasattr(Database, "toggle_favori"):
+    _invalidate_after("toggle_favori", "fav")  # add_favori / remove_favori passent par toggle_favori
 
 
 db = Database()
