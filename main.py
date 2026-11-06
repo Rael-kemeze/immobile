@@ -201,6 +201,29 @@ def setup_app(page: ft.Page) -> None:
     # restaure la session en arriere-plan (voir views/splash.py).
     # Le temps reel (db.subscribe_biens) n'est plus lance au demarrage : il n'est
     # pas indispensable et pouvait retarder l'affichage sur mobile.
+    def _on_lifecycle(e):
+        # Retour au premier plan : force le redessin (evite l'ecran blanc sous Android)
+        state = str(getattr(e, "data", "") or getattr(e, "state", "")).lower()
+        print(f"[LIFECYCLE] {state}")
+        if "resume" not in state:
+            return
+
+        def _refresh():
+            import time
+            for delay in (0.0, 0.4, 1.2):
+                time.sleep(delay)
+                try:
+                    if not page.views:
+                        page.go("/splash")
+                    else:
+                        page.update()
+                except Exception as exc:
+                    print(f"[LIFECYCLE] erreur : {exc}")
+
+        import threading
+        threading.Thread(target=_refresh, daemon=True).start()
+
+    page.on_app_lifecycle_state_change = _on_lifecycle
     page.go("/splash")
 
 
