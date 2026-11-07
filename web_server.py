@@ -21,6 +21,12 @@ if str(ROOT) not in sys.path:
 
 os.environ.setdefault("FLET_MAX_UPLOAD_SIZE", str(10 * 1024 * 1024))   # 10 Mo max par fichier
 os.environ.setdefault("FLET_SERVER_IP", "0.0.0.0")
+# Cle qui signe les liens d'envoi de fichiers (OBLIGATOIRE pour les photos en web).
+# Sans elle : "Specify secret_key parameter or set FLET_SECRET_KEY". Les liens ne vivent que
+# 10 min, donc une cle aleatoire a chaque demarrage suffit (ou fixez FLET_SECRET_KEY dans .env).
+if not os.getenv("FLET_SECRET_KEY"):
+    import secrets
+    os.environ["FLET_SECRET_KEY"] = secrets.token_hex(32)
 
 import flet as ft  # noqa: E402
 import main as app  # noqa: E402
