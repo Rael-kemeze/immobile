@@ -78,9 +78,7 @@ def settings_view(page: ft.Page) -> ft.View:
     country_dd.on_change = on_country
 
     def open_dialog(dlg: ft.AlertDialog):
-        page.dialog = dlg
-        dlg.open = True
-        page.update()
+        page.open(dlg)
     def close_dialog(dlg: ft.AlertDialog):
         dlg.open = False
         page.update()

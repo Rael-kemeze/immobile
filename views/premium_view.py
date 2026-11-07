@@ -77,14 +77,14 @@ def premium_view(page: ft.Page) -> ft.View:
                     monetization.apply_plan_to_user(user, plan["id"], db)
                     snack(page, f"🎉 Bienvenue en {plan['name']} !")
                 
-                page.dialog.open = False
+                dlg.open = False
                 page.update()
                 page.go("/premium")
             except Exception as ex:
                 snack(page, friendly_error(ex), error=True)
         
         def close_dlg(e):
-            page.dialog.open = False
+            dlg.open = False
             page.update()
         
         dlg = ft.AlertDialog(
@@ -112,9 +112,7 @@ def premium_view(page: ft.Page) -> ft.View:
                 ft.ElevatedButton("J'ai payé", on_click=confirm_pay, style=ft.ButtonStyle(bgcolor=COLORS["primary"], color="#FFFFFF")),
             ]
         )
-        page.dialog = dlg
-        dlg.open = True
-        page.update()
+        page.open(dlg)
 
     def plan_card(plan_id: str):
         plan = PLANS[plan_id]

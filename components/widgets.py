@@ -332,9 +332,7 @@ def admin_actions(page: ft.Page, bien: Dict[str, Any], on_changed: Optional[Call
             close()
             action()
         dlg.actions = [ft.TextButton(t("cancel_button"), on_click=close), ft.TextButton(confirm_text, on_click=confirm, style=ft.ButtonStyle(color=COLORS["danger"]))]
-        page.dialog = dlg
-        dlg.open = True
-        page.update()
+        page.open(dlg)
     def do_delete():
         db.delete_bien(bien["id"])
         snack(page, t("listing_deleted"))

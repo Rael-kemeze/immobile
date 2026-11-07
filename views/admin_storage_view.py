@@ -150,9 +150,7 @@ def maintenance_view(page: ft.Page) -> ft.View:
                 def close_dialog(d):
                     d.open = False
                     page.update()
-                page.dialog = dlg
-                dlg.open = True
-                page.update()
+                page.open(dlg)
         except Exception as ex:
             snack(page, friendly_error(ex), error=True)
         progress.visible = False
