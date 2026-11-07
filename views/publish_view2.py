@@ -3,6 +3,7 @@
 from __future__ import annotations
 from typing import List, Optional
 import flet as ft
+from services.i18n import friendly_error
 try:
     FT_ICONS = ft.Icons
 except:
@@ -238,7 +239,7 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
             try:
                 photos.append(db.upload_photo(path))
             except Exception as ex:
-                snack(page, t("upload_failed", err=ex), error=True)
+                snack(page, friendly_error(ex), error=True)
         render_photos()
 
     picker = ImagePicker(page, "publish", on_files, multiple=True, limit=lambda: max_photos - len(photos), on_overflow=lambda: snack(page, t("max_photos", n=max_photos), error=True))
@@ -354,7 +355,7 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
                 snack(page, t("publish_success"))
             page.go("/mes-annonces" if is_edit else "/home")
         except Exception as ex:
-            print(f"[PUBLISH] {ex}"); snack(page, t("publish_error", err=ex), error=True); return
+            print(f"[PUBLISH] {ex}"); snack(page, friendly_error(ex), error=True); return
 
     def bloc(controls):
         return ft.Container(bgcolor="#FFFFFF", border_radius=16, padding=14, border=ft.border.all(1, "#E0E4E1"), content=ft.Column(controls, spacing=10))

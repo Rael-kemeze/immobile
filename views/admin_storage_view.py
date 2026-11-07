@@ -1,6 +1,7 @@
 """Admin - Gestion base de données et stockage."""
 
 import flet as ft
+from services.i18n import friendly_error
 try:
     FT_ICONS = ft.Icons
 except:
@@ -77,7 +78,7 @@ def maintenance_view(page: ft.Page) -> ft.View:
                 stats_text.color = COLORS["text"]
                 
         except Exception as ex:
-            stats_text.value = f"Erreur: {ex}"
+            stats_text.value = friendly_error(ex)
             stats_text.color = COLORS["danger"]
         
         progress.visible = False
@@ -91,7 +92,7 @@ def maintenance_view(page: ft.Page) -> ft.View:
             snack(page, f"{count} photos orphelines supprimées")
             refresh_stats()
         except Exception as ex:
-            snack(page, f"Erreur: {ex}", error=True)
+            snack(page, friendly_error(ex), error=True)
         progress.visible = False
         page.update()
     
@@ -103,7 +104,7 @@ def maintenance_view(page: ft.Page) -> ft.View:
             snack(page, f"Nettoyé: {result['notifications']} notifs, {result['otps']} OTP")
             refresh_stats()
         except Exception as ex:
-            snack(page, f"Erreur: {ex}", error=True)
+            snack(page, friendly_error(ex), error=True)
         progress.visible = False
         page.update()
     
@@ -115,7 +116,7 @@ def maintenance_view(page: ft.Page) -> ft.View:
             snack(page, f"Optimisé ! {result['orphan_deleted']} photos + {result['old_data']} vieilles données")
             refresh_stats()
         except Exception as ex:
-            snack(page, f"Erreur: {ex}", error=True)
+            snack(page, friendly_error(ex), error=True)
         progress.visible = False
         page.update()
     
@@ -135,7 +136,7 @@ def maintenance_view(page: ft.Page) -> ft.View:
                         close_dialog(dlg)
                         refresh_stats()
                     except Exception as ex:
-                        snack(page, f"Erreur: {ex}", error=True)
+                        snack(page, friendly_error(ex), error=True)
                 
                 dlg = ft.AlertDialog(
                     modal=True,
@@ -153,7 +154,7 @@ def maintenance_view(page: ft.Page) -> ft.View:
                 dlg.open = True
                 page.update()
         except Exception as ex:
-            snack(page, f"Erreur: {ex}", error=True)
+            snack(page, friendly_error(ex), error=True)
         progress.visible = False
         page.update()
     

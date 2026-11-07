@@ -212,3 +212,11 @@ class SessionFactory:
     @staticmethod
     def bind(page: Any) -> _BoundSession:
         return _BoundSession(page)
+
+    @staticmethod
+    def bind_current() -> _BoundSession:
+        """Pour une fonction qui n'a pas `page` en parametre : retrouve la page via la pile d'appels."""
+        page = current_page()
+        if page is None:
+            raise RuntimeError("Session : page du visiteur introuvable (fonction appelee hors d'un ecran)")
+        return _BoundSession(page)

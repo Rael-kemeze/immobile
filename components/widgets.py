@@ -13,6 +13,7 @@ from services.countries import COUNTRIES, DEFAULT_COUNTRY_CODE, get_country, fla
 from services.db import ASSETS_DIR, WEB_UPLOAD_DIR, db
 from services.monetization import monetization
 from services.i18n import t
+from services.i18n import friendly_error
 # FIX COMPAT Flet 0.27 vs 0.28
 try:
     FT_ICONS = ft.Icons
@@ -263,21 +264,24 @@ class ImagePicker:
         _PICKERS[key] = self.picker
 
     def open(self, e=None):
+        print("[PICKER] open: clic recu, ouverture du selecteur", flush=True)
         if (sys.platform.startswith("linux") and not getattr(self.page, "web", False) and not any(shutil.which(x) for x in ("zenity", "kdialog", "qarma"))):
             snack(self.page, t("picker_no_tool"), error=True)
         self.picker.pick_files(allow_multiple=self.multiple, file_type=ft.FilePickerFileType.IMAGE)
 
     def _deliver(self, paths: List[str]):
+        print("[PICKER] deliver: chemins =", paths, "existent =", [__import__("os").path.exists(p) for p in paths], flush=True)
         try:
             self.on_files(paths)
         except Exception as ex:
             traceback.print_exc()
-            snack(self.page, t("upload_failed", err=ex), error=True)
+            snack(self.page, friendly_error(ex), error=True)
 
     def _max(self) -> Optional[int]:
         return self.limit() if callable(self.limit) else self.limit
 
     def _on_result(self, e):
+        print("[PICKER] on_result: fichiers =", [(getattr(f, "name", None), getattr(f, "path", None), getattr(f, "size", None)) for f in (e.files or [])], flush=True)
         if not e.files:
             return
         files = list(e.files)
@@ -291,14 +295,24 @@ class ImagePicker:
             self._deliver(local)
         web = [f for f in files if not getattr(f, "path", None)]
         if web:
-            self.picker.upload([ft.FilePickerUploadFile(_n, upload_url=self.page.get_upload_url(_n, 600)) for f in web for _n in [_unique_name(f.name)]])
+            self.picker.upload([ft.FilePickerUploadFile(f.name, upload_url=self.page.get_upload_url(self._up_name(f.name), 600)) for f in web])
+
+    def _up_name(self, name, pop=False):
+        # Flet retrouve le fichier choisi par son nom d'origine : on le garde pour l'envoi,
+        # seul le nom de stockage sur le serveur est rendu unique.
+        names = self.__dict__.setdefault('_up_names', {})
+        if pop:
+            return names.pop(name, None) or name
+        names[name] = _unique_name(name)
+        return names[name]
 
     def _on_upload(self, e):
+        print("[PICKER] on_upload:", getattr(e, "file_name", None), "progression =", getattr(e, "progress", None), "erreur =", getattr(e, "error", None), flush=True)
         if getattr(e, "error", None):
-            snack(self.page, t("upload_failed", err=e.error), error=True)
+            snack(self.page, friendly_error(e.error), error=True)
             return
         if e.progress == 1:
-            _p = os.path.join(str(WEB_UPLOAD_DIR), os.path.basename(str(e.file_name)))
+            _p = os.path.join(str(WEB_UPLOAD_DIR), os.path.basename(self._up_name(str(e.file_name), pop=True)))
             self._deliver([_p])
             try:
                 os.remove(_p)  # le fichier temporaire n'est plus utile

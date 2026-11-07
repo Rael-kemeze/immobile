@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import flet as ft
+from services.i18n import friendly_error
 try:
     FT_ICONS = ft.Icons
 except:
@@ -194,7 +195,7 @@ def profile_view(page: ft.Page) -> ft.View:
             set_photo(db.upload_photo(paths[0]))
         except Exception as ex:
             print(f"[PHOTO] echec profil : {ex!r}")
-            snack(page, t("upload_failed", err=ex), error=True)
+            snack(page, friendly_error(ex), error=True)
 
     picker = ImagePicker(page, "profile", on_files, multiple=False)
     photo_btn.on_click = picker.open

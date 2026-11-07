@@ -65,8 +65,7 @@ def error_view(page: ft.Page, details: str) -> ft.View:
         controls=[
             ft.Icon(FT_ICONS.ERROR_OUTLINE, size=48, color=COLORS["danger"]),
             ft.Text("Une erreur est survenue", size=20, weight=ft.FontWeight.BOLD, color=COLORS["danger"]),
-            ft.Text("Faites une capture d'ecran de cette page pour la corriger.", size=12, color=COLORS["muted"]),
-            ft.Text(details, size=10, selectable=True),
+            ft.Text(details, size=10, selectable=True, visible=os.getenv("IMMOBILE_DEBUG") == "1"),
             ft.ElevatedButton(
                 "Reessayer",
                 # le "?r=" force un vrai changement de route meme si on y est deja

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import flet as ft
+from services.i18n import friendly_error
 try:
     FT_ICONS = ft.Icons
 except:
@@ -80,7 +81,7 @@ def premium_view(page: ft.Page) -> ft.View:
                 page.update()
                 page.go("/premium")
             except Exception as ex:
-                snack(page, f"Erreur: {ex}", error=True)
+                snack(page, friendly_error(ex), error=True)
         
         def close_dlg(e):
             page.dialog.open = False

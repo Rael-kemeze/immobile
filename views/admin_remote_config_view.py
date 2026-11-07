@@ -2,6 +2,7 @@
 """Admin - Panneau controle a distance MODERNE - version stable."""
 
 import flet as ft
+from services.i18n import friendly_error
 try:
     FT_ICONS = ft.Icons
 except:
@@ -116,7 +117,7 @@ def remote_config_view(page: ft.Page) -> ft.View:
                 snack(page, "Sauve local version.json")
             page.update()
         except Exception as ex:
-            snack(page, f"Erreur: {ex}", error=True)
+            snack(page, friendly_error(ex), error=True)
 
     def quick_toggle(val, target):
         target.value = val

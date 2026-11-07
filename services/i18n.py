@@ -436,3 +436,22 @@ def t(key: str, **kwargs) -> str:
         except Exception:
             return text
     return text
+
+
+def friendly_error(exc=None, where: str = "") -> str:
+    """Message neutre montre a l'utilisateur. Le detail technique va dans le terminal/les logs."""
+    import traceback
+    print(f"[ERREUR]{(' ' + where) if where else ''} {exc!r}")
+    try:
+        traceback.print_exc()
+    except Exception:
+        pass
+    messages = {
+        "fr": "Une erreur est survenue. Veuillez réessayer.",
+        "en": "Something went wrong. Please try again.",
+        "es": "Ocurrió un error. Inténtalo de nuevo.",
+    }
+    try:
+        return messages.get(get_lang(), messages["fr"])
+    except Exception:
+        return messages["fr"]

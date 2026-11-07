@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import flet as ft
+from services.i18n import friendly_error
 try:
     FT_ICONS = ft.Icons
 except:
@@ -68,7 +69,7 @@ def alerts_view(page: ft.Page) -> ft.View:
             zone_field.value = ""
             refresh_list()
         except Exception as ex:
-            snack(page, f"Erreur: {ex}", error=True)
+            snack(page, friendly_error(ex), error=True)
 
     refresh_list()
 

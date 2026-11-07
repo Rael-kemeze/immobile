@@ -16,6 +16,7 @@ from typing import List
 from urllib.parse import urlparse
 
 import flet as ft
+from services.i18n import friendly_error
 
 FT_ICONS = ft.Icons
 
@@ -540,7 +541,7 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
                     photos.append(db.upload_photo(path))
                     render_photos()
                 except Exception as exc:
-                    snack(page, t("upload_failed", err=exc), error=True)
+                    snack(page, friendly_error(exc), error=True)
         finally:
             set_uploading(False)
 
@@ -707,7 +708,7 @@ def publish_view(page: ft.Page, bien_id: str = None) -> ft.View:
             except Exception as exc:
                 print(f"[PUBLISH] {exc}")
                 set_busy(False)
-                snack(page, t("publish_error", err=exc), error=True)
+                snack(page, friendly_error(exc), error=True)
 
         threading.Thread(target=work, daemon=True).start()
 

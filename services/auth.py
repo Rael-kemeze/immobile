@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Optional, Dict, Any, Tuple
 from services.db import db, hash_password, normalize_phone
 from services.config import APP_CONFIG
+from services.i18n import friendly_error
 
 class Session:
     """Session globale de l'utilisateur connecté."""
@@ -71,7 +72,7 @@ class Session:
                 return None, "Ce numéro est déjà utilisé"
             return None, f"Erreur: {ve}"
         except Exception as ex:
-            return None, f"Erreur création compte: {ex}"
+            return None, friendly_error(ex)
 
     @classmethod
     def change_password(cls, current: str, new: str, confirm: str) -> Tuple[bool, Optional[str]]:
@@ -94,7 +95,7 @@ class Session:
             cls.user["password_hash"] = hash_password(new)
             return True, None
         except Exception as ex:
-            return False, f"Erreur: {ex}"
+            return False, friendly_error(ex)
 
     @classmethod
     def delete_account(cls, password: str) -> Tuple[bool, Optional[str]]:
@@ -114,7 +115,7 @@ class Session:
             cls.user = None
             return True, None
         except Exception as ex:
-            return False, f"Erreur suppression: {ex}"
+            return False, friendly_error(ex)
 
     @classmethod
     def update_profile(cls, patch: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
@@ -130,4 +131,4 @@ class Session:
                 return False, "Ce numéro est déjà utilisé"
             return False, str(ve)
         except Exception as ex:
-            return False, f"Erreur: {ex}"
+            return False, friendly_error(ex)
