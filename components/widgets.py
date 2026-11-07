@@ -6,7 +6,7 @@ from pathlib import Path as PPath
 from typing import Any, Callable, Dict, List, Optional, Union
 import flet as ft
 
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.auth_service import save_session
 from services.config import APP_CONFIG, COLORS, OTHER_CITY, ROLE_SUPER_ADMIN, get_cities, get_currency
 from services.countries import COUNTRIES, DEFAULT_COUNTRY_CODE, get_country, flag_image, flag_url, label
@@ -222,6 +222,7 @@ def empty_state(message: str, icon=None):
         ]))
 
 def password_card(page: ft.Page, title: Optional[str] = None) -> ft.Container:
+    Session = _SessionClass.bind(page)
     current = text_field(t("current_password_label"), password=True, can_reveal_password=True)
     new = text_field(t("new_password_label"), password=True, can_reveal_password=True)
     confirm = text_field(t("confirm_new_password_label"), password=True, can_reveal_password=True)
@@ -240,6 +241,11 @@ def password_card(page: ft.Page, title: Optional[str] = None) -> ft.Container:
             primary_button(t("save_button"), submit, FT_ICONS.SAVE, expand=True),
         ]))
 
+def _unique_name(name) -> str:
+    """Nom de fichier unique pour un envoi web (deux visiteurs peuvent envoyer 'photo.jpg')."""
+    import uuid
+    base = os.path.basename(str(name or "photo")).replace(" ", "_")
+    return f"{uuid.uuid4().hex[:10]}_{base}"
 _PICKERS: Dict[str, Any] = {}
 
 class ImagePicker:
@@ -285,16 +291,22 @@ class ImagePicker:
             self._deliver(local)
         web = [f for f in files if not getattr(f, "path", None)]
         if web:
-            self.picker.upload([ft.FilePickerUploadFile(f.name, upload_url=self.page.get_upload_url(f.name, 600)) for f in web])
+            self.picker.upload([ft.FilePickerUploadFile(_n, upload_url=self.page.get_upload_url(_n, 600)) for f in web for _n in [_unique_name(f.name)]])
 
     def _on_upload(self, e):
         if getattr(e, "error", None):
             snack(self.page, t("upload_failed", err=e.error), error=True)
             return
         if e.progress == 1:
-            self._deliver([os.path.join(str(WEB_UPLOAD_DIR), e.file_name)])
+            _p = os.path.join(str(WEB_UPLOAD_DIR), os.path.basename(str(e.file_name)))
+            self._deliver([_p])
+            try:
+                os.remove(_p)  # le fichier temporaire n'est plus utile
+            except OSError:
+                pass
 
 def admin_actions(page: ft.Page, bien: Dict[str, Any], on_changed: Optional[Callable]=None):
+    Session = _SessionClass.bind(page)
     if not Session.is_admin():
         return None
     def ask(message: str, confirm_text: str, action: Callable):
@@ -383,6 +395,7 @@ class CountryCitySelector:
         return (self.city_dd.value or "").strip()
 
 def bien_card(page: ft.Page, bien: Dict[str, Any], on_open: Callable, on_changed: Optional[Callable]=None):
+    Session = _SessionClass.bind(page)
     is_fav = (bien["id"] in db.favori_ids(Session.user["id"])) if Session.user else False
     def toggle_fav(e):
         if not Session.user:

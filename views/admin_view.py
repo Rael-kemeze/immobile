@@ -8,7 +8,7 @@ except:
     FT_ICONS = ft.Icons
 
 from components.widgets import avatar, badge, password_card, snack, stat_card, text_field
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.config import COLORS, ROLE_SUPER_ADMIN
 from services.countries import country_name, get_country
 from services.db import db
@@ -17,6 +17,7 @@ from services.i18n import t
 MAX_USERS_SHOWN = 200
 
 def admin_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     if not Session.is_admin():
         page.go("/home")
         return ft.View(route="/admin")

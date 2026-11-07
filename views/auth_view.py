@@ -9,7 +9,7 @@ except AttributeError:
     FT_ICONS = ft.Icons
 
 from components.widgets import CountryCitySelector, primary_button, outline_button, snack, text_field
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.auth_service import save_session
 from services.config import COLORS, APP_CONFIG, LANGUAGES
 from services.countries import DEFAULT_COUNTRY_CODE, get_dial
@@ -17,7 +17,8 @@ from services.db import db
 from services.i18n import t
 from views.cgu import cgu_view
 
-REGISTER_DRAFT: dict = {}
+from services import visitor as _visitor  # noqa: E402
+REGISTER_DRAFT = _visitor.PageDict("register_draft", dict)  # un brouillon par visiteur
 
 def _logo():
     return ft.Column(
@@ -39,6 +40,7 @@ def auth_container(page, controls):
         content=ft.Container(content=inner, width=520, alignment=ft.alignment.center))
 
 def login_view(page):
+    Session = _SessionClass.bind(page)
     phone = text_field(t("phone_label"), prefix_icon=FT_ICONS.PHONE)
     phone.value = get_dial(DEFAULT_COUNTRY_CODE)
     password = text_field(t("password_label"), password=True, can_reveal_password=True, prefix_icon=FT_ICONS.LOCK)
@@ -150,6 +152,7 @@ def verify_otp_view(page):
     return ft.View(route="/verify-otp", controls=[ft.Text("Plus de vérification")])
 
 def register_cgu_view(page):
+    Session = _SessionClass.bind(page)
     def finalize():
         d = REGISTER_DRAFT
         if not d:

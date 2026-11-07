@@ -10,14 +10,14 @@ except:
 
 from components.widgets import app_bar, bien_card, responsive_wrapper, avatar
 from components.widgets import text_field
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.config import APP_CONFIG, CATEGORIES, COLORS, TRANSACTIONS
 from services.countries import COUNTRIES, get_country, label, flag_image
 from services.db import db
 from services.monetization import monetization
 from services.i18n import t
 
-STATE = {
+_STATE_DEFAULT = {
     "search": "",
     "categorie": None,
     "transaction": None,
@@ -28,6 +28,8 @@ STATE = {
     "prix_discutable": False,
     "country_init": False,
 }
+from services import visitor as _visitor  # noqa: E402
+STATE = _visitor.PageDict("home_state", _STATE_DEFAULT)  # un dict par visiteur
 
 HOME_COUNTRY_KEY = "home_country"
 PAGE_SIZE = 6  # annonces affichees d'un coup (chaque carte = ~45 elements a envoyer au telephone)
@@ -52,6 +54,7 @@ def _category_chips():
     return [(t("filter_all"), None)] + [(t(f"category_{c}"), c) for c in CATEGORIES]
 
 def home_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     if not STATE["country_init"]:
         try:
             pref = page.client_storage.get(HOME_COUNTRY_KEY)

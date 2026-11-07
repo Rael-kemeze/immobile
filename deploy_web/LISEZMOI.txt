@@ -1,0 +1,41 @@
+IMMOBILE - VERSION WEB (l'application reelle, sans installation)
+================================================================
+
+Meme application que sur Android : memes comptes, memes annonces (Supabase),
+memes photos (Cloudinary). Le visiteur l'ouvre dans son navigateur.
+
+Votre site PHP ne peut pas l'heberger : elle a besoin d'un petit serveur Python.
+
+1) Tester sur votre PC
+   source venv/bin/activate
+   pip install flet-web==0.28.3        # une seule fois
+   python web_server.py                # ouvrir http://localhost:8000
+   (le .env est lu comme d'habitude)
+   Test multi-visiteurs : ouvrez l'adresse dans deux navigateurs differents (ou un
+   onglet de navigation privee) et connectez-vous avec deux comptes : chacun doit
+   voir SES donnees.
+
+2) Mettre en ligne (au choix)
+   A. Render.com
+      - depot GitHub PRIVE (sans .env)
+      - New > Web Service > Runtime Docker > Dockerfile Path : deploy_web/Dockerfile
+      - Environment : ajouter SUPABASE_URL, SUPABASE_KEY, SUPABASE_BUCKET,
+        CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+      - Plan gratuit : s'endort apres ~15 min (1re visite ~30-60 s). Payant : toujours actif.
+      - Custom Domain : app.immobile.cm
+   B. VPS (5-6 $/mois)
+      docker build -f deploy_web/Dockerfile -t immobile-web .
+      docker run -d --restart unless-stopped -p 8000:8000 --env-file prod.env immobile-web
+      + proxy HTTPS (Caddy : "app.immobile.cm { reverse_proxy localhost:8000 }")
+      Nginx : transmettre les en-tetes Upgrade/Connection (WebSocket).
+
+3) Brancher le site
+   config.php : define('DEMO_URL','https://app.immobile.cm');
+   Utilisez un sous-domaine du MEME domaine que le site (app.immobile.cm) : la fenetre
+   de demo integree au site garde ainsi la session des visiteurs.
+
+Securite a verifier avant d'ouvrir au public
+ - Le compte administrateur est accessible depuis le web : mot de passe FORT
+   (>= 12 caracteres), jamais celui par defaut. Lancez reset_admin.py si besoin.
+ - Sur le web, SUPABASE_KEY reste sur le serveur (contrairement a l'APK).
+ - Ne copiez JAMAIS .env ni services/app_env.py dans l'image.

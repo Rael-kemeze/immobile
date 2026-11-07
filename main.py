@@ -18,16 +18,7 @@ try:
 except Exception:
     FT_ICONS = ft.icons
 
-class _LazySession:
-    """Proxy : ne charge services.auth (donc supabase) qu'au premier usage,
-    pour que le splash s'affiche AVANT les imports lourds."""
-
-    def __getattr__(self, name):
-        from services.auth import Session as _S
-        return getattr(_S, name)
-
-
-Session = _LazySession()
+from services.visitor import SessionFactory as _SessionClass
 from services.config import APP_CONFIG, COLORS, LANGUAGES
 from pathlib import Path as _Path
 
@@ -97,6 +88,7 @@ def show_error(page: ft.Page) -> None:
 
 
 def setup_app(page: ft.Page) -> None:
+    Session = _SessionClass.bind(page)
     page.title = APP_CONFIG["APP_NAME"]
     page.bgcolor = COLORS["bg"]
     page.theme_mode = ft.ThemeMode.LIGHT

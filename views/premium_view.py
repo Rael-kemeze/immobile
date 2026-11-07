@@ -8,12 +8,13 @@ except:
     FT_ICONS = ft.Icons
 
 from components.widgets import app_bar, primary_button, snack
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.config import COLORS
 from services.db import db
 from services.monetization import PLANS, PAYMENT_METHODS, monetization, ENABLE_MONETIZATION, ENABLE_BOOST_ONLY, MY_MTN_NUMBER, MY_ORANGE_NUMBER
 
 def premium_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     if not Session.user:
         page.go("/login")
         return ft.View(route="/premium")

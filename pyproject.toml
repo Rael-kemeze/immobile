@@ -33,7 +33,7 @@ split_per_abi = true
 [tool.flet.app]
 # Flet empaquette TOUT le dossier du projet (seul "build" est ignore par defaut).
 # On retire ici ce qui n'a rien a faire dans l'APK.
-exclude = ["venv", ".venv", "source", ".git", ".github", "uploads", "assets/uploads", "local_db.json", "apk"]
+exclude = ["venv", ".venv", "source", ".git", ".github", "uploads", "assets/uploads", "local_db.json", "apk", "web_server.py", "deploy_web"]
 
 [tool.flet.android.meta_data]
 "io.flutter.embedding.android.EnableImpeller" = "false"

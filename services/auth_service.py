@@ -9,7 +9,7 @@ try:
 except:
     FT_ICONS = ft.Icons
 
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.db import db
 
 SESSION_KEY = "immobile_user_session"
@@ -41,6 +41,7 @@ def clear_session(page: ft.Page) -> None:
 
 def restore_session(page: ft.Page) -> bool:
     """Recharge Session.user - FIX admin-001 uuid invalide pour Supabase"""
+    Session = _SessionClass.bind(page)
     data = get_session(page)
     if not data or not data.get("user_id"):
         return False

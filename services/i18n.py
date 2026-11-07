@@ -28,6 +28,7 @@ SUPPORTED_LANGS = tuple(LANGUAGES)
 DEFAULT_LANG = DEFAULT_LANGUAGE
 
 _state = {"lang": DEFAULT_LANG}
+from services import visitor as _visitor  # noqa: E402
 
 translations = {
     "fr": {
@@ -397,9 +398,11 @@ def init_lang(page: ft.Page) -> str:
         stored = None
     if stored in SUPPORTED_LANGS:
         _state["lang"] = stored
+        _visitor.set_value(page, "lang", stored)
         return stored
     lang = _detect_device_lang(page)
     _state["lang"] = lang
+    _visitor.set_value(page, "lang", lang)
     try:
         page.client_storage.set("lang", lang)
     except Exception:
@@ -411,6 +414,7 @@ def set_lang(page: ft.Page, lang: str) -> None:
     if lang not in SUPPORTED_LANGS:
         lang = DEFAULT_LANG
     _state["lang"] = lang
+    _visitor.set_value(page, "lang", lang)
     try:
         page.client_storage.set("lang", lang)
     except Exception:
@@ -418,11 +422,11 @@ def set_lang(page: ft.Page, lang: str) -> None:
 
 
 def get_lang() -> str:
-    return _state["lang"]
+    return _visitor.get_value("lang", _state["lang"])
 
 
 def t(key: str, **kwargs) -> str:
-    lang = _state["lang"]
+    lang = _visitor.get_value("lang", _state["lang"])
     text = translations.get(lang, {}).get(key)
     if text is None:
         text = translations[DEFAULT_LANG].get(key, key)

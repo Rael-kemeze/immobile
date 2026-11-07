@@ -8,7 +8,7 @@ except:
     FT_ICONS = ft.Icons
 
 from components.widgets import primary_button, snack, text_field
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.config import APP_CONFIG, COLORS, LANGUAGES
 from services.countries import DEFAULT_COUNTRY_CODE, get_dial
 from services.i18n import t
@@ -53,6 +53,7 @@ def _auth_container(page: ft.Page, controls: list) -> ft.Control:
     )
 
 def forgot_password_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     phone = text_field(t("phone_label"), prefix_icon=FT_ICONS.PHONE)
     phone.value = get_dial(DEFAULT_COUNTRY_CODE)
 
@@ -145,6 +146,7 @@ def verify_reset_otp_view(page: ft.Page) -> ft.View:
     return ft.View(route="/verify-reset-otp", bgcolor=COLORS["bg"], scroll=ft.ScrollMode.AUTO, controls=[content])
 
 def reset_password_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     d = _RESET_DRAFT
     if not d:
         page.go("/forgot-password")

@@ -10,7 +10,7 @@ except:
 
 
 from components.widgets import app_bar, badge, format_prix, image_kwargs, type_label, whatsapp_button, phone_row, snack, admin_actions, flag_image, primary_button, outline_button, wa_url, call_url
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.config import COLORS
 from services.countries import get_country, label as country_label
 from services.db import db
@@ -38,6 +38,7 @@ def _spec_item(icon: str, label: str, value: Any, color: str = "#0F6B3F"):
     )
 
 def detail_view(page: ft.Page, bien_id: str) -> ft.View:
+    Session = _SessionClass.bind(page)
     bien = db.get_bien(bien_id)
     if not bien:
         return ft.View(route=f"/bien/{bien_id}", controls=[ft.Text(t("not_found"))])

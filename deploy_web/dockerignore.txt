@@ -1,0 +1,17 @@
+.env
+.env.*
+services/app_env.py
+local_db.json
+demo_data
+uploads
+assets/uploads
+venv
+.venv
+source
+.git
+.github
+apk
+build
+__pycache__
+*.pyc
+*.log

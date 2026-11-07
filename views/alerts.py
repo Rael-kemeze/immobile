@@ -8,7 +8,7 @@ except:
     FT_ICONS = ft.Icons
 
 from components.widgets import CountryCitySelector, primary_button, snack, text_field
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.config import COLORS
 from services.countries import get_country, label
 from services.db import db
@@ -22,6 +22,7 @@ def _appbar(page: ft.Page) -> ft.AppBar:
     )
 
 def alerts_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     if not Session.user:
         page.go("/login")
         return ft.View(route="/alerts")

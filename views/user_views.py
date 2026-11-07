@@ -20,7 +20,7 @@ from components.widgets import (
     snack,
     text_field,
 )
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.auth_service import clear_session
 from services.config import APP_CONFIG, COLORS, STATUS_EN_ATTENTE
 from services.db import db
@@ -40,6 +40,7 @@ def _appbar(title: str, page: ft.Page, actions=None):
 
 
 def favoris_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     biens = db.list_favoris(Session.user["id"]) if Session.user else []
     controls = (
         [
@@ -66,6 +67,7 @@ def favoris_view(page: ft.Page) -> ft.View:
 
 
 def mes_annonces_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     biens = (
         db.list_biens(only_active=False, user_id=Session.user["id"])
         if Session.user else []
@@ -148,6 +150,7 @@ def mes_annonces_view(page: ft.Page) -> ft.View:
 
 
 def _current_user():
+    Session = _SessionClass.bind_current()
     u = Session.user
     if u:
         fresh = db.get_user(u["id"])
@@ -158,6 +161,7 @@ def _current_user():
 
 
 def profile_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     user = _current_user() or {}
     username = text_field(t("name_label"), value=user.get("username", ""))
     city = text_field(t("city_label"), value=user.get("city", ""))
@@ -282,6 +286,7 @@ def profile_view(page: ft.Page) -> ft.View:
 
 
 def notifications_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     notifs = db.list_notifications(Session.user["id"]) if Session.user else []
     controls = []
     for n in notifs:

@@ -8,7 +8,7 @@ except:
     FT_ICONS = ft.Icons
 
 from components.widgets import avatar, badge, password_card, snack, text_field
-from services.auth import Session
+from services.visitor import SessionFactory as _SessionClass
 from services.auth_service import clear_session
 from services.config import APP_CONFIG, COLORS, LANGUAGES
 from services.countries import COUNTRIES, get_country, label
@@ -38,6 +38,7 @@ def _tile(icon: str, text: str, on_click, color: str = None, subtitle: str = Non
     )
 
 def settings_view(page: ft.Page) -> ft.View:
+    Session = _SessionClass.bind(page)
     user = Session.user or {}
     is_admin = Session.is_admin()
 
